@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>JB 서바이벌 🦑</title>
+<style>
+  :root{
+    --bg:#0d0f14; --bg2:#171a23; --card:#222634; --line:#323849;
+    --ink:#f5f6fa; --mute:#9096a8; --pink:#ff2e7e; --teal:#13c2a3; --gold:#ffcf3f; --red:#ff4d5e;
+    --z0:#2f7cf6; --z1:#ff4d5e; --q0:#ffb020; --q1:#20c07a; --q2:#2f7cf6; --q3:#b35cf5;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body,#app{height:100%}
+  body{background:var(--bg);color:var(--ink);overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;
+    -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  button{font:inherit;border:0;cursor:pointer;border-radius:14px;padding:.7em 1.4em;font-weight:800;background:var(--pink);color:#fff}
+  button.ghost{background:transparent;color:var(--mute);border:2px solid var(--line)}
+  input{font:inherit;border-radius:12px;border:2px solid var(--line);background:var(--bg2);color:var(--ink);padding:.6em .8em}
+  .banner{position:fixed;left:0;right:0;bottom:0;background:#ff9f1a;color:#1b1b1b;font-size:12px;font-weight:700;text-align:center;padding:4px;z-index:60}
+  .shapes{letter-spacing:.2em;color:var(--pink);font-weight:900}
+
+  /* ---------- 경기장(공통) ---------- */
+  .arena{position:relative;border-radius:18px;overflow:hidden;background:var(--bg2);touch-action:none}
+  .zone{position:absolute;border:2px solid rgba(255,255,255,.08);transition:filter .4s,opacity .4s,box-shadow .4s}
+  .zone .zl{position:absolute;display:flex;flex-direction:column;align-items:center;gap:.2em;padding:.6em;text-align:center;pointer-events:none;opacity:.95}
+  .zone .zl b{font-weight:900;line-height:1}
+  .zone .zl span{font-weight:800;line-height:1.25;word-break:keep-all}
+  .zone .zc{position:absolute;right:.5em;bottom:.4em;font-weight:900;opacity:.75;pointer-events:none}
+  .z2 .zl{left:0;right:0;top:6%}
+  .z4-0 .zl,.z4-2 .zl{left:2%;align-items:flex-start;text-align:left;max-width:70%}
+  .z4-1 .zl,.z4-3 .zl{right:2%;align-items:flex-end;text-align:right;max-width:70%}
+  .z4-0 .zl,.z4-1 .zl{top:3%} .z4-2 .zl,.z4-3 .zl{bottom:3%}
+  .z4-0 .zc,.z4-2 .zc{right:auto;left:.6em} .z4-2 .zc,.z4-3 .zc{bottom:auto;top:.4em}
+  .zone.correct{filter:brightness(1.35);box-shadow:inset 0 0 0 6px var(--gold);z-index:1}
+  .zone.wrong{filter:grayscale(1) brightness(.35)}
+  .startc{position:absolute;left:41%;top:41%;width:18%;height:18%;border-radius:50%;border:3px dashed rgba(255,255,255,.35);
+    background:rgba(13,15,20,.55);display:grid;place-items:center;z-index:1;pointer-events:none}
+  .startc span{color:rgba(255,255,255,.55);font-weight:800}
+  .ch{position:absolute;transform:translate(-50%,-60%);display:flex;flex-direction:column;align-items:center;z-index:3;pointer-events:none;will-change:left,top}
+  .ch .e{line-height:1}
+  .ch .n{font-weight:800;background:rgba(0,0,0,.55);border-radius:6px;padding:0 .35em;white-space:nowrap;max-width:7em;overflow:hidden;text-overflow:ellipsis}
+  .ch.walk .e{animation:bob .2s infinite alternate}
+  .ch.me .n{background:var(--pink)}
+  .ch.dead{animation:die 1.6s forwards;z-index:4}
+  .ch.saved .e{animation:jump .5s 3}
+  @keyframes bob{from{transform:translateY(-6%) rotate(-7deg)}to{transform:translateY(6%) rotate(7deg)}}
+  @keyframes die{0%{transform:translate(-50%,-60%)}8%{transform:translate(-56%,-60%)}16%{transform:translate(-44%,-60%)}24%{transform:translate(-56%,-60%)}32%{transform:translate(-50%,-60%) rotate(0)}
+    60%{transform:translate(-50%,-30%) rotate(90deg);opacity:1;filter:grayscale(1)}100%{transform:translate(-50%,-30%) rotate(90deg);opacity:0;filter:grayscale(1)}}
+  @keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-35%)}}
+
+  svg.av{display:block;width:1em;height:1.32em;overflow:visible}
+  svg.avh{height:.87em}
+  .bigcount{position:absolute;inset:0;display:grid;place-items:center;z-index:2;pointer-events:none}
+  .bigcount span{font-weight:900;line-height:1;color:var(--red);opacity:.82;font-variant-numeric:tabular-nums;
+    text-shadow:0 0 .12em #000,0 .04em 0 rgba(0,0,0,.5);animation:bigpop .9s ease-out both}
+  .host .bigcount span{font-size:52vh}
+  .stage .bigcount span{font-size:130px}
+  @keyframes bigpop{0%{transform:scale(1.7);opacity:0}25%{transform:scale(1);opacity:.9}100%{transform:scale(.92);opacity:.6}}
+  .mid{flex:1;display:flex;gap:2vw;min-height:0}
+  .mid .panel{flex:1;border-radius:2.4vh;padding:2.4vh 2vw;display:flex;flex-direction:column;gap:2vh;min-width:0;background:var(--bg2);border:3px solid var(--teal)}
+  .mid .panel.out{border-color:var(--red);flex:.8}
+  .mid h2{font-size:4.6vh;font-weight:900}
+  .mid h2 b{font-size:7vh;color:var(--teal)} .mid .out h2 b{color:var(--red)}
+  .mid .list{flex:1;display:flex;flex-wrap:wrap;gap:3.5vh 1.4vw;align-content:flex-start;justify-content:center;padding-top:3vh}
+  .mid .who{display:flex;flex-direction:column;align-items:center;gap:.4vh;animation:rise .5s ease-out both}
+  .mid .who .n{font-size:.2em;font-weight:800;max-width:6em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mid .pass .who .e{animation:hop .6s ease-in-out infinite}
+  @keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-10%)}}
+  .mid .out .who{animation:fall 1s ease-in both}
+  .mid .out .who .e{filter:grayscale(1) brightness(.7)}
+  .mid .out .who .n{color:var(--mute);text-decoration:line-through}
+  .mid .none{margin:auto;color:var(--mute);font-size:3vh;font-weight:800}
+  @keyframes fall{0%{transform:translateY(-30vh) rotate(0);opacity:0}60%{transform:translateY(0) rotate(0);opacity:1}80%{transform:rotate(-14deg)}100%{transform:rotate(-8deg)}}
+  /* ---------- 진행자 ---------- */
+  .host{height:100%;display:flex;flex-direction:column;padding:2vh 2vw;gap:1.6vh}
+  .host header{display:flex;align-items:center;gap:1.2vw;min-height:7vh}
+  .host header h1{font-size:4vh;letter-spacing:-.02em;white-space:nowrap}
+  .host header .sp{flex:1}
+  .pill{background:var(--card);border-radius:999px;padding:.6vh 1.2vw;font-size:2.4vh;font-weight:800;color:var(--mute);white-space:nowrap}
+  .pill b{color:var(--gold)}
+  .qtext{flex:1;font-size:4.4vh;font-weight:900;line-height:1.3;word-break:keep-all}
+  .tbox{font-size:11vh;line-height:1;font-weight:900;font-variant-numeric:tabular-nums;width:14vh;text-align:center;color:var(--teal)}
+  .tbox.hot{color:var(--red);animation:pulse .5s infinite alternate}
+  @keyframes pulse{to{transform:scale(1.12)}}
+  .tbar{height:1vh;border-radius:9px;background:var(--card);overflow:hidden}
+  .tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--red),var(--gold),var(--teal));transform-origin:left}
+  .host .body{flex:1;display:flex;gap:1.6vw;min-height:0}
+  .host .arena{flex:1}
+  .host .arena .zl b{font-size:9vh}
+  .host .arena .z4 .zl b{font-size:7vh}
+  .host .arena .zl span{font-size:5.4vh;max-width:32vw}
+  .host .arena .zc{font-size:3.4vh}
+  .host .arena .startc span{font-size:2.2vh}
+  .host .ch .e{font-size:8vh} .host .ch .n{font-size:1.6vh}
+  .qrbox{width:34vh;flex:none;background:#fff;color:#111;border-radius:2.4vh;padding:2.4vh;display:flex;flex-direction:column;align-items:center;gap:1.2vh;align-self:flex-start}
+  .qrbox #qr{width:100%;aspect-ratio:1}
+  .qrbox #qr svg{width:100%;height:100%}
+  .qrbox .code{font-size:5vh;font-weight:900;letter-spacing:.15em}
+  .qrbox p{font-size:1.8vh;text-align:center;color:#444;word-break:break-all}
+  .noqr{height:100%;display:grid;place-items:center;text-align:center;color:#888;font-size:2vh;border:2px dashed #ccc;border-radius:2vh}
+  .lobbymsg{position:absolute;left:0;right:0;top:40%;text-align:center;font-size:4vh;font-weight:900;color:rgba(255,255,255,.18);pointer-events:none}
+  .lobbymsg b{display:block;font-size:12vh;color:rgba(255,46,126,.35)}
+  .host footer{display:flex;align-items:center;gap:1.2vw;min-height:7vh}
+  .host footer button{font-size:2.8vh}
+  .alive{font-size:3vh;font-weight:900;white-space:nowrap}
+  .alive b{color:var(--teal);font-size:4.4vh}
+  .ghosts{flex:1;display:flex;flex-wrap:wrap;gap:.4vw;align-items:center;min-width:0;overflow:hidden;max-height:7vh}
+  .ghosts span{font-size:4vh;filter:grayscale(1);opacity:.45}
+  .ghosts em{font-style:normal;color:var(--mute);font-size:2vh;font-weight:700;margin-right:.4vw}
+  .verdict{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10;background:#0d0f14;box-shadow:0 2vh 6vh rgba(0,0,0,.6);border:3px solid var(--pink);
+    border-radius:3vh;padding:3vh 5vw;text-align:center;animation:pop .5s ease-out;pointer-events:none}
+  .verdict h2{font-size:6vh;font-weight:900}
+  .verdict p{font-size:3vh;color:var(--mute);margin-top:1vh}
+  .verdict p b{color:var(--ink)}
+  @keyframes pop{0%{transform:translate(-50%,-50%) scale(.5);opacity:0}70%{transform:translate(-50%,-50%) scale(1.06)}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+  .endwrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vh}
+  .endwrap h2{font-size:8vh;font-weight:900}
+  .winners{display:flex;flex-wrap:wrap;justify-content:center;gap:3vw;max-width:90vw}
+  .winner{display:flex;flex-direction:column;align-items:center;gap:.6vh;animation:rise .7s ease-out both}
+  .winner .c{font-size:6vh}
+  .winner .e{font-size:16vh;line-height:1}
+  .winner .n{font-size:4vh;font-weight:900}
+  @keyframes rise{from{transform:translateY(8vh);opacity:0}to{transform:none;opacity:1}}
+
+  /* ---------- 참가자 ---------- */
+  .pl{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px calc(24px + env(safe-area-inset-bottom));gap:16px;text-align:center}
+  .pl h1{font-size:30px}
+  .pl .sub{color:var(--mute);font-size:15px;line-height:1.5}
+  .pl input{width:100%;max-width:320px;font-size:20px;text-align:center}
+  .emgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;max-width:320px}
+  .emgrid button{font-size:30px;padding:6px 0;background:var(--bg2);border:2px solid transparent;border-radius:12px}
+  .emgrid button.sel{border-color:var(--pink);background:var(--card)}
+  .pl.join{justify-content:flex-start;gap:10px;padding-top:14px}
+  .jtop{display:flex;gap:14px;align-items:center;width:100%;max-width:360px}
+  .pvw{font-size:88px;background:var(--bg2);border-radius:18px;padding:6px 16px}
+  .jside{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+  .pl .jside input{width:100%;font-size:18px}
+  .jside button{font-size:15px;padding:.5em}
+  .tabs{display:flex;gap:6px;width:100%;max-width:360px}
+  .tabs button{flex:1;padding:.6em 0;font-size:15px;background:var(--bg2);color:var(--mute);border-radius:10px}
+  .tabs button.sel{background:var(--pink);color:#fff}
+  .opts{flex:1;min-height:0;overflow-y:auto;width:100%;max-width:360px;text-align:left;-webkit-overflow-scrolling:touch}
+  .opts h4{font-size:13px;color:var(--mute);margin:6px 2px}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .oc{padding:3px;background:var(--bg2);border:2px solid transparent;border-radius:12px;display:grid;place-items:center}
+  .oc.sel{border-color:var(--pink);background:var(--card)}
+  .oc svg.av{width:100%;height:auto}
+  .sw{aspect-ratio:1;border-radius:50%;border:3px solid var(--bg);padding:0;box-shadow:0 0 0 2px var(--line)}
+  .sw.sel{box-shadow:0 0 0 3px var(--pink)}
+  .seg{display:flex;gap:6px}
+  .seg button{flex:1;background:var(--bg2);color:var(--mute);padding:.55em;font-size:15px;border:2px solid transparent}
+  .seg button.sel{background:var(--card);color:#fff;border-color:var(--pink)}
+  .pl .big{font-size:20px;width:100%;max-width:320px;padding:16px}
+  .stage{height:100%;display:flex;flex-direction:column;gap:10px;padding:14px 12px calc(14px + env(safe-area-inset-bottom))}
+  .stage .top{display:flex;align-items:center;gap:10px}
+  .stage .top .qn{font-weight:900;color:var(--pink);font-size:18px}
+  .stage .top .sp{flex:1}
+  .stage .top .t{font-size:46px;line-height:1;font-weight:900;font-variant-numeric:tabular-nums;color:var(--teal);min-width:44px;text-align:right}
+  .stage .top .t.hot{color:var(--red)}
+  .stage .qt{font-size:19px;font-weight:800;line-height:1.35;word-break:keep-all;min-height:1.35em}
+  .stage .arena{flex:none;width:100%;aspect-ratio:2/1;border-radius:14px}
+  .stage .arena .zone .zl{padding:.35em}
+  .stage .arena .zl b{font-size:30px}
+  .stage .arena .z4 .zl b{font-size:16px}
+  .stage .arena .zl span{font-size:15px;max-width:42vw}
+  .stage .arena .zc{display:none}
+  .stage .arena .startc span{font-size:9px}
+  .stage .ch .e{font-size:34px} .stage .ch .n{font-size:10px}
+  .padwrap{flex:1;display:grid;place-items:center;min-height:0}
+  .pad{position:relative;width:min(62vw,240px);aspect-ratio:1;touch-action:none;-webkit-touch-callout:none}
+  .pad .k{position:absolute;width:36%;height:36%;border-radius:22px;background:var(--card);border:2px solid var(--line);
+    display:grid;place-items:center;font-size:30px;color:var(--mute);box-shadow:0 6px 0 #0006;transition:transform .05s,background .05s;pointer-events:none}
+  .pad .up{left:32%;top:0} .pad .down{left:32%;bottom:0} .pad .left{left:0;top:32%} .pad .right{right:0;top:32%}
+  .pad .hub{position:absolute;left:36%;top:36%;width:28%;height:28%;border-radius:50%;background:var(--bg2);pointer-events:none}
+  .pad .k.on{background:var(--pink);color:#fff;border-color:var(--pink);transform:translateY(4px);box-shadow:0 2px 0 #0006}
+  .pad.off{opacity:.35}
+  .stage .dead{flex:1;display:grid;place-items:center;color:var(--mute);font-size:18px;font-weight:800}
+  .host .body .arena.fix{flex:none;height:100%;aspect-ratio:2/1;max-width:100%;margin:0 auto}
+  .stage .hint{font-size:14px;color:var(--mute);text-align:center;min-height:20px}
+  .ovl{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:30;text-align:center;padding:24px;
+    background:rgba(13,15,20,.82);animation:fade .3s}
+  .ovl .big{font-size:84px;line-height:1}
+  .ovl h2{font-size:34px;font-weight:900;line-height:1.25;word-break:keep-all}
+  .ovl p{color:var(--mute);font-size:16px;line-height:1.5}
+  .ovl.win h2{color:var(--teal)} .ovl.lose h2{color:var(--red)}
+  @keyframes fade{from{opacity:0}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+/* =====================================================================
+   ① Firebase 설정 — 탭 레이스와 같은 프로젝트를 그대로 써도 됩니다.
+      databaseURL 이 비어 있으면 "로컬 테스트 모드"(같은 브라우저 탭끼리만 연결)
+   ===================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAFhGKBsbNO78pm6NBEByg8n8MlIM4oglM",
+  authDomain: "leadership-summit-94d20.firebaseapp.com",
+  databaseURL: "https://leadership-summit-94d20-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "leadership-summit-94d20",
+  appId: "1:589908249087:web:39fc777ada35a938a23fca"
+};
+
+/* =====================================================================
+   ② 문제 — options 가 2개면 2분할(O/X), 4개면 4분할. answer 는 정답의 번호(0부터)
+   ===================================================================== */
+const QUESTIONS = [
+  { q: "올해 LG전자는 SG 목표 매출인 70조를 달성했다.", options: ["O", "X"], answer: 0 },
+  { q: "연초 CEO께서 적으신 개인 목표는?", options: ["하프마라톤 완주", "AI 전문가 되기", "책 30권 읽기", "10대 명산 완등하기"], answer: 1 },
+  { q: "2026년 전사 JB 슬로건은?", options: ["JB in Action", "JB Together", "Voice of JB", "JB, Go Beyond"], answer: 0 },
+  { q: "2025년 COX 박소연 선임의 소속팀은 브랜드전략팀이다.", options: ["O", "X"], answer: 0 },
+  { q: "IFA 2026 개최 도시는?", options: ["뮌헨", "베를린", "프랑크푸르트", "슈투트가르트"], answer: 1 },
+  { q: "LG 트윈스의 올해 최종 성적은 3위이다.", options: ["O", "X"], answer: 1 },
+];
+
+/* ③ 게임 설정 */
+const QUESTION_SEC = 15;     // 문항당 제한시간(초)
+const READY_MS = 1500;       // 문제가 뜬 뒤 이동 시작까지 대기(ms)
+const JUDGE_DELAY = 900;     // 시간 종료 후 판정까지 여유(ms) — 마지막 위치 수신 대기
+const SPEED_X = 0.38;        // 좌우 이동 속도(경기장 폭/초)
+const SPEED_Y = 0.76;        // 상하 이동 속도(경기장 높이/초) — 경기장이 2:1이라 화면상 같은 속도
+const START_R = 0.09;        // 가운데 '출발' 원 반지름 — 이 안에 있으면 미응답으로 탈락
+
+const params = new URLSearchParams(location.search);
+const IS_HOST = params.has("host");
+const app = document.getElementById("app");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const randId = n => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[b % 32]).join("");
+const CIRC = ["①","②","③","④"];
+const isOX = q => q.options.length === 2;
+
+function zoneOf(x, y, n) {
+  if (Math.hypot(x - .5, y - .5) < START_R) return -1;
+  if (n === 2) return x < .5 ? 0 : 1;
+  return (y < .5 ? 0 : 2) + (x < .5 ? 0 : 1);
+}
+function zonesHTML(q) {
+  if (!q) return "";
+  const n = q.options.length;
+  const rects = n === 2 ? [[0,0,50,100],[50,0,50,100]] : [[0,0,50,50],[50,0,50,50],[0,50,50,50],[50,50,50,50]];
+  const colors = n === 2 ? ["47,124,246","255,77,94"] : ["255,176,32","32,192,122","47,124,246","179,92,245"];
+  return rects.map(([l,t,w,h], i) => `
+    <div class="zone ${n === 2 ? "z2" : "z4 z4-" + i}" data-z="${i}" style="left:${l}%;top:${t}%;width:${w}%;height:${h}%;
+      background:linear-gradient(135deg, rgba(${colors[i]},.42), rgba(${colors[i]},.16))">
+      <div class="zl">${n === 2 ? `<b>${esc(q.options[i])}</b>` : `<span>${esc(q.options[i])}</span>`}</div>
+      <div class="zc"></div></div>`).join("") + `<div class="startc"><span>출발</span></div>`;
+}
+
+/* =====================================================================
+   아바타 — 코드 "성별.피부.얼굴.머리.머리색.모자.의상종류.원피스.투피스"
+   ===================================================================== */
+const SKINS = ["#fff0e4","#ffe4d0","#ffd9bf","#fbcdab","#f3c097","#e9b184","#dea274","#d09263","#bf8254","#ad7247","#99623b","#845231","#6e4328","#583420","#452818"];
+const HAIRC = ["#1c1c1c","#3b2a20","#5a3a22","#8a5a2b","#b9803a","#e0b45a","#f2dc8a","#c0392b","#e67e22","#ff7eb6","#8e5bd6","#3d7bf0","#2bb8a3","#9aa0a6","#f2f2f2"];
+const INK = "#2a2320";
+const LN = `fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
+const OL = `stroke="rgba(0,0,0,.22)" stroke-width=".8"`;
+const shade = (h, f) => "#" + [1, 3, 5].map(i => Math.max(0, Math.min(255, Math.round(parseInt(h.substr(i, 2), 16) * f))).toString(16).padStart(2, "0")).join("");
+const tint = (h, f) => "#" + [1, 3, 5].map(i => { const v = parseInt(h.substr(i, 2), 16); return Math.round(v + (255 - v) * f).toString(16).padStart(2, "0"); }).join("");
+const AV_MAX = [2, 15, 15, 15, 15, 16, 2, 15, 15];
+const parseAv = s => { const a = String(s || "").split(".").map(Number); return a.length === 9 && a.every(Number.isFinite) ? a.map((v, i) => ((v % AV_MAX[i]) + AV_MAX[i]) % AV_MAX[i]) : [0, 3, 0, 0, 0, 0, 1, 0, 0]; };
+const randomAv = () => AV_MAX.map(n => Math.floor(Math.random() * n)).join(".");
+
+function hairSVG(i, c) {
+  const d = shade(c, .78), p = (dd, f = c, x = "") => `<path d="${dd}" fill="${f}" ${x}/>`;
+  const CAP = "M23.5 44 C21 3 79 3 76.5 44 C75 31 66 24 50 24 C34 24 25 31 23.5 44Z";
+  const SIDE = "M23.5 44 C21 3 79 3 76.5 44 C76 33 70 26 62 25 C54 33 38 35 27 31 Q24 37 23.5 44Z";
+  const BANG = "M23 44 C21 3 79 3 77 44 L76 36 Q63 27 50 33 Q37 27 24 36Z";
+  switch (i) {
+    case 0: return ["", p(CAP)];
+    case 1: return ["", p(SIDE)];
+    case 2: return ["", p("M22.5 47 C19 2 81 2 77.5 47 L76 35 Q50 31 24 35Z")];
+    case 3: return ["", p("M23.5 44 L21 27 L29 31 L27 14 L37 22 L40 6 L48 18 L55 4 L59 19 L69 8 L69 23 L79 19 L75 33 L76.5 44 C74 32 66 26 50 26 C34 26 26 32 23.5 44Z")];
+    case 4: return [`<circle cx="50" cy="33" r="31" fill="${c}"/><circle cx="24" cy="22" r="9" fill="${c}"/><circle cx="76" cy="22" r="9" fill="${c}"/><circle cx="50" cy="6" r="9" fill="${c}"/><circle cx="35" cy="9" r="9" fill="${c}"/><circle cx="65" cy="9" r="9" fill="${c}"/>`,
+      p("M25 38 C28 21 72 21 75 38 C68 28 58 25 50 25 C42 25 32 28 25 38Z")];
+    case 5: return ["", p("M24.3 40 C24 9 76 9 75.7 40 C72 28 64 22 50 22 C36 22 28 28 24.3 40Z", c, 'opacity=".8"')];
+    case 6: return ["", p("M23.5 44 C22 14 30 8 42 9 C50 -3 84 2 76.5 44 C75 32 70 26 62 25 C52 24 40 22 30 29 Q25 35 23.5 44Z")];
+    case 7: return [p("M21 40 C19 4 81 4 79 40 V62 Q79 71 70 71 H30 Q21 71 21 62Z", d), p(BANG)];
+    case 8: return [p("M20 40 C18 2 82 2 80 40 V97 Q80 101 76 101 H24 Q20 101 20 97Z", d), p(SIDE)];
+    case 9: return [p("M70 18 C92 12 98 44 86 64 C85 50 82 40 71 34Z", d) + `<circle cx="74" cy="24" r="3.4" fill="#ff5a7a"/>`, p(CAP)];
+    case 10: return [p("M27 30 C8 28 5 60 13 82 C17 66 22 56 29 48Z", d) + p("M73 30 C92 28 95 60 87 82 C83 66 78 56 71 48Z", d), p(BANG) + `<circle cx="24" cy="34" r="3" fill="#ff5a7a"/><circle cx="76" cy="34" r="3" fill="#ff5a7a"/>`];
+    case 11: return ["", `<circle cx="50" cy="9" r="9.5" fill="${d}"/>` + p(CAP)];
+    case 12: return ["", `<circle cx="27" cy="14" r="9.5" fill="${d}"/><circle cx="73" cy="14" r="9.5" fill="${d}"/>` + p(BANG)];
+    case 13: return [p("M20 40 C18 2 82 2 80 40 C85 55 76 62 82 76 C87 90 79 101 72 99 H28 C21 101 13 90 18 76 C24 62 15 55 20 40Z", d), p("M23.5 44 C21 3 79 3 76.5 44 C74 32 62 27 50 21 C38 27 26 32 23.5 44Z")];
+    default: return ["", p("M24.3 40 C24 9 76 9 75.7 40 C72 28 64 22 50 22 C36 22 28 28 24.3 40Z", c, 'opacity=".45"') + p("M43 27 C40 6 46 -2 50 -2 C54 -2 60 6 57 27Z")];
+  }
+}
+
+function hatSVG(i) {
+  const p = (dd, f, x = OL) => `<path d="${dd}" fill="${f}" ${x}/>`;
+  switch (i) {
+    case 1: return p("M25 30 C25 5 75 5 75 30Z", "#e5484d") + p("M48 27 H76 Q92 28 94 35 Q78 32 48 33Z", "#b6343a") + `<circle cx="50" cy="10" r="2.2" fill="#b6343a"/>`;
+    case 2: return p("M24 31 C22 3 78 3 76 31Z", "#3d7bf0") + `<rect x="21.5" y="26" width="57" height="8.5" rx="4" fill="#2a5bc0" ${OL}/><circle cx="50" cy="6" r="5.5" fill="#fff" ${OL}/>`;
+    case 3: return `<rect x="34" y="-3" width="32" height="24" rx="2" fill="#222"/><rect x="34" y="14" width="32" height="5" fill="#e5484d"/><ellipse cx="50" cy="21.5" rx="30" ry="4.5" fill="#222"/>`;
+    case 4: return p("M29 25 L27 5 L39 15 L50 1 L61 15 L73 5 L71 25Z", "#ffcf3f", 'stroke="#c99a12" stroke-width="1" stroke-linejoin="round"') + `<circle cx="50" cy="19" r="2.6" fill="#e5484d"/><circle cx="38" cy="20" r="2" fill="#3d7bf0"/><circle cx="62" cy="20" r="2" fill="#2bb8a3"/>`;
+    case 5: return p("M35 23 L53 -3 L67 23Z", "#ff5fa2") + `<circle cx="50" cy="13" r="1.8" fill="#fff"/><circle cx="57" cy="18" r="1.8" fill="#ffe27a"/><circle cx="44" cy="19" r="1.8" fill="#7ee0ff"/><circle cx="53" cy="-2" r="4" fill="#ffe27a"/>`;
+    case 6: return `<ellipse cx="50" cy="25" rx="39" ry="7" fill="#e8c97a" ${OL}/>` + p("M31 24 C31 2 69 2 69 24Z", "#f0d68f") + `<path d="M31.5 19 Q50 24 68.5 19 V24 Q50 28 31.5 24Z" fill="#c0392b"/>`;
+    case 7: return `<ellipse cx="47" cy="17" rx="28" ry="11.5" fill="#c0392b" transform="rotate(-12 47 17)" ${OL}/><path d="M50 4 l2 -5" stroke="#8f2a20" stroke-width="2.5" stroke-linecap="round"/>`;
+    case 8: return p("M6 25 Q20 15 32 22 H68 Q80 15 94 25 Q72 33 50 31 Q28 33 6 25Z", "#9c6b3f") + p("M32 23 C30 0 44 3 50 9 C56 3 70 0 68 23Z", "#b07a48") + `<path d="M32 19 Q50 24 68 19 V23 Q50 27 32 23Z" fill="#5d3d22"/>`;
+    case 9: return `<g fill="#fff" stroke="#c9ced6" stroke-width="1"><circle cx="37" cy="9" r="10"/><circle cx="63" cy="9" r="10"/><circle cx="50" cy="5" r="11"/><rect x="33" y="13" width="34" height="13" rx="2"/></g>`;
+    case 10: return p("M25 29 C27 4 62 -2 80 20 L89 35 L74 28Z", "#e5484d") + `<rect x="21.5" y="24" width="57" height="9" rx="4.5" fill="#fff" ${OL}/><circle cx="89" cy="37" r="5.5" fill="#fff" ${OL}/>`;
+    case 11: return `<path d="M25 30 C28 7 72 7 75 30" fill="none" stroke="#333" stroke-width="3"/>` + p("M27 21 L29 1 L44 12Z", "#333", "") + p("M73 21 L71 1 L56 12Z", "#333", "") + p("M30.5 17 L31.5 6 L40 12.5Z", "#ff9ec4", "") + p("M69.5 17 L68.5 6 L60 12.5Z", "#ff9ec4", "");
+    case 12: return `<path d="M33 16 V27 Q50 33 67 27 V16Z" fill="#2b2b2b"/>` + p("M50 1 L86 13 L50 25 L14 13Z", "#1b1b1b", "") + `<path d="M50 13 L80 15 V29" fill="none" stroke="#ffcf3f" stroke-width="1.6"/><circle cx="80" cy="30" r="2.4" fill="#ffcf3f"/>`;
+    case 13: return p("M26 28 C26 2 74 2 74 28Z", "#ffcf3f") + `<rect x="46.5" y="4" width="7" height="22" rx="3" fill="#e0ad1b"/><rect x="19" y="25" width="62" height="6" rx="3" fill="#e0ad1b" ${OL}/>`;
+    case 14: return `<path d="M22.5 44 C20 2 80 2 77.5 44" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round"/><rect x="16" y="36" width="10" height="18" rx="5" fill="#e5484d" ${OL}/><rect x="74" y="36" width="10" height="18" rx="5" fill="#e5484d" ${OL}/>`;
+    case 15: return p("M28 25 C30 4 70 4 72 25 L82 35 Q50 42 18 35Z", "#7fb069") + `<path d="M28.5 23 Q50 28 71.5 23" fill="none" stroke="#5c8a49" stroke-width="2.5"/>`;
+    default: return "";
+  }
+}
+
+const FACES = [["dot","dot","smile"],["big","big","smile","blush"],["arc","arc","grin"],["dot","arc","tongue"],["dot","dot","o"],["dot","dot","smirk","sun"],["dot","dot","smile","glasses"],["line","line","flat"],["dot","dot","smirk","brows"],["sq","sq","grin"],["heart","heart","smile"],["dot","dot","cat","blush"],["dot","dot","smile2","stache"],["big","big","frown","tear"],["dot","dot","grin","freckles"]];
+function faceSVG(i, g) {
+  const E = {
+    dot: x => `<circle cx="${x}" cy="45" r="3" fill="${INK}"/><circle cx="${x + 1}" cy="44" r="1" fill="#fff"/>`,
+    big: x => `<ellipse cx="${x}" cy="45" rx="3.8" ry="4.8" fill="${INK}"/><circle cx="${x + 1.2}" cy="43.2" r="1.5" fill="#fff"/><circle cx="${x - 1.2}" cy="47" r=".8" fill="#fff"/>`,
+    arc: x => `<path d="M${x - 3.6} 46.5 Q${x} 41 ${x + 3.6} 46.5" ${LN}/>`,
+    line: x => `<path d="M${x - 3.5} 45.5 H${x + 3.5}" ${LN}/>`,
+    sq: (x, r) => `<path d="M${r ? x + 3 : x - 3} 42 L${r ? x - 3 : x + 3} 45 L${r ? x + 3 : x - 3} 48" ${LN}/>`,
+    heart: x => `<path d="M${x} 49.5 l-4.2-4.4 a2.4 2.4 0 0 1 4.2-2.6 a2.4 2.4 0 0 1 4.2 2.6Z" fill="#ff4d7e"/>`,
+  };
+  const M = {
+    smile: `<path d="M45 54 Q50 59.5 55 54" ${LN}/>`,
+    smile2: `<path d="M46 57.5 Q50 60.5 54 57.5" ${LN}/>`,
+    grin: `<path d="M43.5 53 Q50 64 56.5 53Z" fill="#8c2f39"/><path d="M46.6 58 Q50 61 53.4 58 Q50 56.4 46.6 58Z" fill="#ff8fa3"/>`,
+    o: `<ellipse cx="50" cy="56.5" rx="2.8" ry="3.6" fill="#8c2f39"/>`,
+    flat: `<path d="M46 56 H54" ${LN}/>`,
+    cat: `<path d="M44.5 54 Q47.2 57.5 50 54 Q52.8 57.5 55.5 54" ${LN}/>`,
+    tongue: `<path d="M45 54 Q50 59.5 55 54" ${LN}/><path d="M48.5 57 h5 v2.6 a2.5 2.5 0 0 1 -5 0Z" fill="#ff7a93"/>`,
+    smirk: `<path d="M45.5 55.5 Q52 58 56 52.5" ${LN}/>`,
+    frown: `<path d="M45 58 Q50 53.5 55 58" ${LN}/>`,
+  };
+  const X = {
+    blush: `<ellipse cx="32.5" cy="52" rx="4" ry="2.4" fill="#ff7a8a" opacity=".45"/><ellipse cx="67.5" cy="52" rx="4" ry="2.4" fill="#ff7a8a" opacity=".45"/>`,
+    glasses: `<g fill="rgba(255,255,255,.18)" stroke="#333" stroke-width="1.6"><circle cx="40" cy="45" r="6.4"/><circle cx="60" cy="45" r="6.4"/></g><path d="M46.4 45 H53.6 M33.6 44 L25 42 M66.4 44 L75 42" stroke="#333" stroke-width="1.6"/>`,
+    sun: `<rect x="32" y="40" width="15.5" height="10.5" rx="4" fill="#111"/><rect x="52.5" y="40" width="15.5" height="10.5" rx="4" fill="#111"/><path d="M47 43 H53 M32 43 L24.5 41 M68 43 L75.5 41" stroke="#111" stroke-width="2"/><path d="M35 43 l4 -1.5 M55.5 43 l4 -1.5" stroke="#fff" stroke-width="1.2" opacity=".6" stroke-linecap="round"/>`,
+    brows: `<path d="M35.5 38.5 L44 41 M64.5 38.5 L56 41" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/>`,
+    stache: `<path d="M50 52 Q45.5 49.5 41 53.5 Q46 56.5 50 53.6 Q54 56.5 59 53.5 Q54.5 49.5 50 52Z" fill="#3b2a20"/>`,
+    tear: `<path d="M34.5 50 q-2.8 4.4 0 6 q2.8-1.6 0-6Z" fill="#6cc4ff"/>`,
+    freckles: `<g fill="#b3703f" opacity=".7"><circle cx="32" cy="51" r=".9"/><circle cx="35" cy="53" r=".9"/><circle cx="30.5" cy="54" r=".9"/><circle cx="68" cy="51" r=".9"/><circle cx="65" cy="53" r=".9"/><circle cx="69.5" cy="54" r=".9"/></g>`,
+  };
+  const f = FACES[i] || FACES[0];
+  let s = E[f[0]](40, false) + E[f[1]](60, true);
+  if (g && f[0] !== "heart" && f[3] !== "sun") s += `<path d="M36.6 43 L34.2 41.2 M36 45.4 L33.4 44.9 M63.4 43 L65.8 41.2 M64 45.4 L66.6 44.9" stroke="${INK}" stroke-width="1.2" stroke-linecap="round"/>`;
+  return s + M[f[2]] + (f[3] ? X[f[3]] : "");
+}
+
+const ONE = [
+  { t: "dress", c: "#e5484d", d: "belt" }, { t: "dress", c: "#27408b", d: "collar" }, { t: "dress", c: "#ffd23f", d: "dots" },
+  { t: "dress", c: "#ff9ec4", d: "flowers" }, { t: "dress", c: "#222222", d: "pearls", bare: 1 },
+  { t: "overall", c: "#4a78c2", sh: "#ffffff" }, { t: "overall", c: "#b99a63", sh: "#e5484d" },
+  { t: "jump", c: "#2f6fb5", d: "zip" }, { t: "jump", c: "#7d5bd0", d: "side" }, { t: "jump", c: "#8a9099", d: "side" },
+  { t: "jump", c: "#2d3a6b", d: "stars" }, { t: "jump", c: "#a8703f", d: "tummy" }, { t: "coat", c: "#ffffff" },
+  { t: "jump", c: "#d8322f", d: "star", cape: "#2a4fb0" }, { t: "jump", c: "#4caf50", d: "tummy" },
+];
+const TWO = [
+  { c: "#ffffff", s: 1, b: "pants", bc: "#3b5f9e" }, { c: "#ffffff", s: 1, d: "stripes", dc: "#e5484d", b: "shorts", bc: "#2d3a6b" },
+  { c: "#9aa0a6", s: 2, d: "hoodie", b: "pants", bc: "#222222" }, { c: "#1f2a44", s: 2, d: "suit", dc: "#c0392b", b: "pants", bc: "#1f2a44" },
+  { c: "#ffffff", s: 2, d: "buttons", b: "skirt", bc: "#222222" }, { c: "#c8102e", s: 1, d: "collar", b: "pants", bc: "#b99a63" },
+  { c: "#27408b", s: 2, d: "jacket", dc: "#ffffff", b: "pants", bc: "#3b5f9e" }, { c: "#ffd23f", s: 1, b: "skirt", bc: "#4a78c2" },
+  { c: "#2e7d4f", s: 2, b: "pants", bc: "#6b4a2f" }, { c: "#ffb3d1", s: 2, d: "buttons", b: "skirt", bc: "#ffffff" },
+  { c: "#222222", s: 2, d: "jacket", dc: "#dddddd", b: "pants", bc: "#222222" }, { c: "#e5484d", s: 1, d: "number", b: "shorts", bc: "#ffffff" },
+  { c: "#ffffff", s: 1, d: "pin", dc: "#27408b", b: "pants", bc: "#ffffff" }, { c: "#18a7b5", s: 1, d: "flowers", b: "shorts", bc: "#f2e3c0" },
+  { c: "#222222", s: 2, b: "pants", bc: "#7d8590" },
+];
+const PTS = [[41, 72], [50, 77], [59, 72], [44, 85], [56, 85], [38, 97], [50, 95], [62, 97], [44, 105], [57, 105]];
+function decoSVG(d, c, dc, dress) {
+  const pts = dress ? PTS : PTS.slice(0, 5).concat([[39, 92], [61, 92], [50, 91]]);
+  switch (d) {
+    case "belt": return `<rect x="35.5" y="81" width="29" height="3.6" fill="${shade(c, .6)}"/>`;
+    case "collar": return `<path d="M42.5 65 L50 73 L57.5 65 L54 63.5 L50 68 L46 63.5Z" fill="#fff" ${OL}/>`;
+    case "dots": return pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.7" fill="#fff"/>`).join("");
+    case "flowers": return pts.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="2" fill="${["#fff", "#ffe27a", "#ff6b9d"][i % 3]}"/><circle cx="${x}" cy="${y}" r=".8" fill="${["#ffb020", "#ff6b9d", "#fff"][i % 3]}"/>`).join("");
+    case "pearls": return [[43.5, 67], [46.5, 69.2], [50, 70], [53.5, 69.2], [56.5, 67]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.3" fill="#fff"/>`).join("");
+    case "stripes": return [70.5, 76.5, 82.5, 88.5].map(y => `<rect x="35.6" y="${y}" width="28.8" height="2.8" fill="${dc}"/>`).join("");
+    case "pin": return [39, 44.5, 50, 55.5, 61].map(x => `<path d="M${x} 66 V97" stroke="${dc}" stroke-width=".8"/>`).join("");
+    case "zip": return `<path d="M50 65 V98" stroke="${shade(c, .6)}" stroke-width="1.4"/><rect x="54" y="74" width="7" height="5.5" rx="1" fill="${shade(c, .8)}"/><rect x="35.5" y="86" width="29" height="3" fill="${shade(c, .7)}"/>`;
+    case "side": return `<rect x="35.6" y="67" width="2.2" height="31" fill="#fff"/><rect x="62.2" y="67" width="2.2" height="31" fill="#fff"/><path d="M50 65 V84" stroke="${shade(c, .65)}" stroke-width="1.2"/>`;
+    case "stars": return PTS.slice(0, 5).map(([x, y]) => `<path d="M${x} ${y - 2.2} l.7 1.5 1.6 .2 -1.2 1.1 .3 1.6 -1.4 -.8 -1.4 .8 .3 -1.6 -1.2 -1.1 1.6 -.2Z" fill="#ffe27a"/>`).join("");
+    case "tummy": return `<ellipse cx="50" cy="83" rx="9.5" ry="11" fill="${tint(c, .45)}"/>`;
+    case "star": return `<path d="M50 72 l2.5 5.2 5.7 .7 -4.2 3.9 1.1 5.6 -5.1 -2.8 -5.1 2.8 1.1 -5.6 -4.2 -3.9 5.7 -.7Z" fill="#ffd23f"/>`;
+    case "hoodie": return `<rect x="41.5" y="84" width="17" height="8.5" rx="3" fill="${shade(c, .82)}"/><path d="M46.5 67 V76 M53.5 67 V76" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>`;
+    case "suit": return `<path d="M43.5 65 L50 80 L56.5 65Z" fill="#fff"/><path d="M50 67.5 l-2.4 3.5 2.4 12 2.4 -12Z" fill="${dc}"/><path d="M43.5 65 L50 80 L56.5 65" fill="none" stroke="${tint(c, .25)}" stroke-width="1.2"/><circle cx="50" cy="88" r="1.1" fill="${tint(c, .3)}"/>`;
+    case "jacket": return `<path d="M44.5 65 H55.5 V98 H44.5Z" fill="${dc}"/><path d="M44.5 65 V98 M55.5 65 V98" stroke="${shade(c, .6)}" stroke-width="1"/>`;
+    case "buttons": return [72, 80, 88].map(y => `<circle cx="50" cy="${y}" r="1.3" fill="${shade(c, .55)}"/>`).join("") + `<path d="M50 66 V97" stroke="${shade(c, .8)}" stroke-width=".6"/>`;
+    case "number": return `<text x="50" y="88" font-size="15" font-weight="900" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif">7</text>`;
+    default: return "";
+  }
+}
+
+function avatarSVG(code, crop) {
+  const [g, sk, fc, hr, hc, ht, om, o1, o2] = parseAv(code);
+  const s = SKINS[sk], sd = shade(s, .88);
+  const TORSO = g ? "M37 70 Q37 65 42 65 H58 Q63 65 63 70 L65 98 H35Z" : "M35 70 Q35 65 41 65 H59 Q65 65 65 70 V98 H35Z";
+  const arm = (r, sleeve, long) => {
+    const x = r ? 64 : 27, cx = r ? 68.5 : 31.5;
+    return `<g transform="rotate(${r ? -8 : 8} ${r ? 69 : 31} 68)"><rect x="${x}" y="67" width="9" height="27" rx="4.5" fill="${long ? sleeve : s}" ${long ? OL : ""}/>` +
+      (long ? `<circle cx="${cx}" cy="91" r="4.5" fill="${s}"/>` : sleeve ? `<rect x="${x}" y="67" width="9" height="12" rx="4" fill="${sleeve}" ${OL}/>` : "") + `</g>`;
+  };
+  const arms = (sleeve, long) => arm(0, sleeve, long) + arm(1, sleeve, long);
+  const legs = `<rect x="40" y="96" width="8.5" height="24" rx="3" fill="${s}"/><rect x="51.5" y="96" width="8.5" height="24" rx="3" fill="${s}"/>`;
+  const shoes = c => `<ellipse cx="43" cy="121" rx="6.8" ry="3.6" fill="${c}"/><ellipse cx="57" cy="121" rx="6.8" ry="3.6" fill="${c}"/>`;
+  const pants = (c, len) => `<rect x="35" y="90" width="30" height="10" fill="${c}"/><rect x="38.5" y="96" width="11" height="${len}" rx="2" fill="${c}" ${OL}/><rect x="50.5" y="96" width="11" height="${len}" rx="2" fill="${c}" ${OL}/>`;
+  const torso = c => `<path d="${TORSO}" fill="${c}" ${OL}/>`;
+  let back = "", body = "";
+  if (om === 0) {
+    const o = ONE[o1];
+    if (o.t === "dress") body = legs + shoes("#333") + `<path d="M36 82 H64 L72 110 H28Z" fill="${o.c}" ${OL}/>` + arms(o.bare ? null : o.c, false) + torso(o.c) + decoSVG(o.d, o.c, null, true);
+    else if (o.t === "overall") body = legs + shoes("#6b4a2f") + pants(o.c, 23) + arms(o.sh, false) + torso(o.sh) +
+      `<path d="M35.3 88 H64.7 V98 H35.3Z" fill="${o.c}"/><rect x="41" y="75" width="18" height="15" rx="2" fill="${o.c}" ${OL}/><path d="M42.5 76 L40.5 65.5 M57.5 76 L59.5 65.5" stroke="${o.c}" stroke-width="3.2"/><circle cx="43.5" cy="77.5" r="1.2" fill="#ffd23f"/><circle cx="56.5" cy="77.5" r="1.2" fill="#ffd23f"/>`;
+    else if (o.t === "coat") body = legs + shoes("#333") + pants("#5b6470", 23) + `<path d="M34.5 90 H65.5 V111 H34.5Z" fill="#fff" ${OL}/>` + arms("#ffffff", true) + torso("#ffffff") +
+      `<path d="M44.5 65 L50 74 L55.5 65Z" fill="#6fa8dc"/><path d="M50 74 V111" stroke="#c9ced6" stroke-width="1"/><rect x="54" y="78" width="7" height="6" rx="1" fill="none" stroke="#c9ced6"/><path d="M56 77 v4" stroke="#3d7bf0" stroke-width="1.2"/>`;
+    else {
+      if (o.cape) back = `<path d="M36 67 L22 110 H78 L64 67Z" fill="${o.cape}" ${OL}/>`;
+      body = legs + shoes(shade(o.c, .6)) + pants(o.c, 23) + arms(o.c, true) + torso(o.c) + decoSVG(o.d, o.c);
+    }
+  } else {
+    const o = TWO[o2];
+    const bottom = o.b === "skirt" ? `<path d="M35 90 H65 L70 109 H30Z" fill="${o.bc}" ${OL}/>` : pants(o.bc, o.b === "shorts" ? 9 : 23);
+    body = legs + shoes(o.b === "pants" ? "#333" : "#fff\" stroke=\"#999") + bottom + arms(o.c, o.s === 2) +
+      (o.d === "hoodie" ? `<ellipse cx="50" cy="66.5" rx="14" ry="5.5" fill="${shade(o.c, .8)}"/>` : "") + torso(o.c) + decoSVG(o.d, o.c, o.dc);
+  }
+  const [hb, hf] = hairSVG(hr, HAIRC[hc]);
+  const head = `<rect x="46" y="60" width="8" height="8" fill="${sd}"/><circle cx="24.5" cy="45" r="4.2" fill="${s}"/><circle cx="75.5" cy="45" r="4.2" fill="${s}"/><circle cx="50" cy="42" r="26" fill="${s}"/>`;
+  const vb = crop === "head" ? "4 -6 92 80" : "0 -6 100 132";
+  return `<svg class="av${crop === "head" ? " avh" : ""}" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${back}${hb}${body}${head}${faceSVG(fc, g)}${hf}${hatSVG(ht)}</svg>`;
+}
+window.__av = avatarSVG;
+
+// 마지막 5초: 경기장 한가운데 큰 숫자
+function setBig(v) {
+  const el = document.getElementById("big"); if (!el || el.dataset.v === String(v)) return;
+  el.dataset.v = v; el.innerHTML = v === "" ? "" : `<span>${v}</span>`;
+}
+/* ---------------- DB 계층 (Firebase / 로컬) ---------------- */
+async function makeDB() {
+  if (FIREBASE_CONFIG.databaseURL) {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const fb = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+    const db = fb.getDatabase(initializeApp(FIREBASE_CONFIG));
+    let offset = 0;
+    fb.onValue(fb.ref(db, ".info/serverTimeOffset"), s => offset = s.val() || 0);
+    return {
+      mode: "firebase",
+      now: () => Date.now() + offset,
+      get: async p => (await fb.get(fb.ref(db, p))).val(),
+      set: (p, v) => fb.set(fb.ref(db, p), v),
+      update: (p, o) => fb.update(fb.ref(db, p), o),
+      remove: p => fb.remove(fb.ref(db, p)),
+      on: (p, cb) => fb.onValue(fb.ref(db, p), s => cb(s.val())),
+      onDisconnect: (p, o) => fb.onDisconnect(fb.ref(db, p)).update(o),
+    };
+  }
+  const PRE = "sv:";
+  const listeners = new Set();
+  const read = k => { try { return JSON.parse(localStorage.getItem(PRE + k)); } catch { return null; } };
+  const keys = () => Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i));
+  function get(p) {
+    const exact = read(p); if (exact != null) return exact;
+    let out = null; const pre = PRE + p + "/";
+    for (const k of keys()) {
+      if (!k.startsWith(pre)) continue;
+      const v = read(k.slice(PRE.length)); if (v == null) continue;
+      const rest = k.slice(pre.length).split("/");
+      out = out || {}; let o = out;
+      for (let j = 0; j < rest.length - 1; j++) o = o[rest[j]] = o[rest[j]] || {};
+      o[rest.at(-1)] = v;
+    }
+    return out;
+  }
+  const removeTree = p => { for (const k of keys()) if (k === PRE + p || k.startsWith(PRE + p + "/")) localStorage.removeItem(k); };
+  const fire = () => listeners.forEach(l => l.cb(get(l.p)));
+  addEventListener("storage", e => { if (!e.key || e.key.startsWith(PRE)) fire(); });
+  return {
+    mode: "local", now: () => Date.now(), get: async p => get(p),
+    set: async (p, v) => { removeTree(p); if (v != null) localStorage.setItem(PRE + p, JSON.stringify(v)); fire(); },
+    update: async (p, o) => { const cur = read(p) || {}; for (const k in o) { if (o[k] == null) delete cur[k]; else cur[k] = o[k]; } localStorage.setItem(PRE + p, JSON.stringify(cur)); fire(); },
+    remove: async p => { removeTree(p); fire(); },
+    on: (p, cb) => { const l = { p, cb }; listeners.add(l); cb(get(p)); return () => listeners.delete(l); },
+    onDisconnect: () => {},
+  };
+}
+
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.append(s); }); }
+async function drawQR(el, text) {
+  try {
+    if (!window.qrcode) await loadScript("https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js");
+    const q = qrcode(0, "M"); q.addData(text); q.make();
+    el.innerHTML = q.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
+  } catch { el.innerHTML = `<div class="noqr">QR 생성 불가<br>(인터넷 연결 필요)</div>`; }
+}
+let actx;
+function beep(f, d, type = "sine", v = .18) {
+  try {
+    actx = actx || new AudioContext();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = f; g.gain.value = v;
+    o.connect(g).connect(actx.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + d); o.stop(actx.currentTime + d);
+  } catch {}
+}
+
+/* =====================================================================
+   진행자(대형 스크린)
+   ===================================================================== */
+async function host(DB) {
+  const room = (params.get("room") || localStorage.getItem("sv-host-room") || randId(4)).toUpperCase();
+  localStorage.setItem("sv-host-room", room);
+  history.replaceState(null, "", `?host&room=${room}`);
+  const base = `sv/rooms/${room}`;
+  const joinURL = `${location.origin}${location.pathname}?room=${room}`;
+
+  let game = await DB.get(`${base}/game`);
+  if (!game) { game = { status: "lobby", round: 1, qIndex: -1 }; await DB.set(`${base}/game`, game); }
+  let players = {};
+  let screen = null, judged = null, lastTick = null;
+  const disp = new Map();
+
+  const roster = () => Object.entries(players).filter(([, p]) => p && p.name && p.round === game.round).map(([id, p]) => ({ id, ...p }));
+  const alive = () => roster().filter(p => p.alive);
+  const posOf = p => (game.status === "lobby" || p.q === game.qIndex) && typeof p.x === "number" ? { x: p.x, y: p.y } : { x: .5, y: .5 };
+
+  /* ---- 로비 ---- */
+  function renderLobby() {
+    screen = "lobby"; disp.clear();
+    app.innerHTML = `
+      <div class="host">
+        <header><h1>🦑 JB 서바이벌 <span class="shapes">○△□</span></h1><div class="sp"></div>
+          <div class="pill">문제 <b>${QUESTIONS.length}</b>개 · 문항당 <b>${QUESTION_SEC}</b>초</div></header>
+        <div class="body">
+          <section class="qrbox"><div id="qr"></div><div class="code">${room}</div><p>카메라로 QR을 찍어 참가하세요<br><small>${esc(joinURL)}</small></p></section>
+          <div class="arena" id="arena"><div class="lobbymsg"><b id="cnt">0</b>명 입장</div></div>
+        </div>
+        <footer><div class="alive" style="color:var(--mute);font-size:2.4vh">폰 화면을 터치하면 캐릭터가 그곳으로 걸어가요. 미리 움직여 보세요!</div><div class="sp" style="flex:1"></div>
+          <button class="ghost" id="clear">참가자 비우기</button><button id="start">게임 시작 ▶</button></footer>
+      </div>`;
+    drawQR(document.getElementById("qr"), joinURL);
+    document.getElementById("start").onclick = () => goQuestion(0);
+    document.getElementById("clear").onclick = () => { if (confirm("참가자 목록을 모두 비울까요?")) DB.remove(`${base}/players`); };
+    syncLobby();
+  }
+  function syncLobby() {
+    const r = roster();
+    document.getElementById("cnt").textContent = r.length;
+    syncChars(r, new Set());
+    if (game.playerCount !== r.length) DB.update(`${base}/game`, { playerCount: r.length });
+  }
+
+  /* ---- 문제 / 판정 ---- */
+  function renderQuestion() {
+    screen = "q"; disp.clear(); renderQuestion.idx = game.qIndex;
+    const q = QUESTIONS[game.qIndex];
+    app.innerHTML = `
+      <div class="host">
+        <header><div class="pill">Q <b>${game.qIndex + 1}</b> / ${QUESTIONS.length}</div>
+          <div class="qtext">${esc(q.q)}</div><div class="tbox" id="tbox">${QUESTION_SEC}</div></header>
+        <div class="tbar"><i id="tbar"></i></div>
+        <div class="body"><div class="arena fix" id="arena">${zonesHTML(q)}<div class="bigcount" id="big"></div></div></div>
+        <footer><div class="alive">생존 <b id="alv">0</b>명</div><div class="ghosts" id="ghosts"></div>
+          <button id="next" style="display:none"></button></footer>
+      </div>`;
+    document.getElementById("next").onclick = advance;
+    syncQuestion();
+  }
+  function syncQuestion() {
+    const q = QUESTIONS[game.qIndex]; if (!q) return;
+    const reveal = game.status === "reveal";
+    const elim = new Set(reveal ? game.elim || [] : []);
+    const show = roster().filter(p => p.alive || elim.has(p.id));
+    syncChars(show, elim);
+    // 구역별 인원
+    const counts = Array(q.options.length).fill(0);
+    for (const p of show) { const { x, y } = posOf(p); const z = zoneOf(x, y, q.options.length); if (z >= 0) counts[z]++; }
+    document.querySelectorAll("#arena .zone").forEach(z => {
+      const i = +z.dataset.z;
+      z.querySelector(".zc").textContent = counts[i] + "명";
+      z.classList.toggle("correct", reveal && i === q.answer);
+      z.classList.toggle("wrong", reveal && i !== q.answer);
+    });
+    const alv = alive().length;
+    document.getElementById("alv").textContent = alv;
+    const dead = roster().filter(p => !p.alive && !elim.has(p.id));
+    document.getElementById("ghosts").innerHTML = dead.length ? `<em>탈락 ${dead.length}</em>` + dead.map(p => `<span title="${esc(p.name)}">${avatarSVG(p.av, "head")}</span>`).join("") : "";
+    const nb = document.getElementById("next");
+    if (reveal) {
+      nb.style.display = ""; nb.textContent = "중간 결과 ▶";
+      if (!document.querySelector(".verdict")) {
+        const v = document.createElement("div"); v.className = "verdict";
+        const ans = isOX(q) ? q.options[q.answer] : q.options[q.answer];
+        v.innerHTML = game.voided
+          ? `<h2>전원 오답! 😱</h2><p>정답은 <b>${esc(ans)}</b> — 이번 문제는 무효, 모두 생존</p>`
+          : `<h2>정답: ${esc(ans)}</h2><p>탈락 <b>${elim.size}</b>명 · 생존 <b>${alv}</b>명</p>`;
+        document.getElementById("arena").append(v);
+        setTimeout(() => v.remove(), 3500);
+      }
+    } else nb.style.display = "none";
+  }
+
+  function syncChars(list, elim) {
+    const arena = document.getElementById("arena"); if (!arena) return;
+    const ids = new Set(list.map(p => p.id));
+    arena.querySelectorAll(".ch").forEach(el => { if (!ids.has(el.dataset.id)) el.remove(); });
+    for (const p of list) {
+      let el = arena.querySelector(`.ch[data-id="${p.id}"]`);
+      if (!el) {
+        el = document.createElement("div"); el.className = "ch"; el.dataset.id = p.id;
+        el.innerHTML = `<span class="e">${avatarSVG(p.av)}</span><span class="n">${esc(p.name)}</span>`;
+        arena.append(el);
+      }
+      el.classList.toggle("dead", elim.has(p.id));
+      el.classList.toggle("saved", game.status === "reveal" && !game.voided && p.alive);
+    }
+  }
+
+  // 같은 지점에 몰린 캐릭터가 완전히 겹치지 않도록 화면에서만 살짝 흩뿌림(판정에는 영향 없음)
+  function jitter(id, t) {
+    let h = 2166136261; for (const c of id) h = Math.imul(h ^ c.charCodeAt(0), 16777619); h ^= h >>> 13; h = Math.imul(h, 2246822507); h ^= h >>> 16;
+    const j = { x: t.x + ((h & 255) / 255 - .5) * .05, y: t.y + (((h >> 8) & 255) / 255 - .5) * .07 };
+    const q = QUESTIONS[game.qIndex], n = q ? q.options.length : 0;
+    if (screen === "q" && zoneOf(j.x, j.y, n) !== zoneOf(t.x, t.y, n)) return t;
+    return j;
+  }
+  function frame() {
+    requestAnimationFrame(frame);
+    if (!(screen === "q" && game.status === "question")) setBig("");
+    if (screen !== "lobby" && screen !== "q") return;
+    for (const el of document.querySelectorAll("#arena .ch")) {
+      const p = players[el.dataset.id]; if (!p) continue;
+      const t = jitter(el.dataset.id, posOf(p));
+      const c = disp.get(el.dataset.id) || { x: .5, y: .5 };
+      const nx = c.x + (t.x - c.x) * .25, ny = c.y + (t.y - c.y) * .25;
+      disp.set(el.dataset.id, { x: nx, y: ny });
+      el.style.left = (nx * 100) + "%"; el.style.top = (ny * 100) + "%";
+      el.classList.toggle("walk", Math.hypot(t.x - nx, t.y - ny) > .004);
+    }
+    if (screen === "q" && game.status === "question") {
+      const now = DB.now();
+      const left = Math.max(0, game.qEndAt - now), total = QUESTION_SEC * 1000;
+      const before = now < game.qStartAt;
+      const sec = before ? QUESTION_SEC : Math.ceil(left / 1000);
+      const tb = document.getElementById("tbox");
+      tb.textContent = sec; tb.classList.toggle("hot", !before && sec <= 5);
+      document.getElementById("tbar").style.transform = `scaleX(${before ? 1 : left / total})`;
+      if (!before && sec <= 5 && sec > 0 && lastTick !== sec) { lastTick = sec; beep(880, .12, "square", .08); }
+      setBig(!before && sec <= 5 && sec > 0 ? sec : "");
+      if (now >= game.qEndAt + JUDGE_DELAY && judged !== `${game.round}-${game.qIndex}`) judge();
+    }
+  }
+  requestAnimationFrame(frame);
+
+  async function goQuestion(i) {
+    const now = DB.now();
+    lastTick = null;
+    await DB.update(`${base}/game`, { status: "question", qIndex: i, qStartAt: now + READY_MS, qEndAt: now + READY_MS + QUESTION_SEC * 1000, elim: null, voided: null });
+  }
+  async function judge() {
+    judged = `${game.round}-${game.qIndex}`;
+    const q = QUESTIONS[game.qIndex];
+    const al = alive();
+    const wrong = al.filter(p => { const { x, y } = posOf(p); return zoneOf(x, y, q.options.length) !== q.answer; });
+    const voided = al.length > 0 && wrong.length === al.length;
+    const elim = voided ? [] : wrong.map(p => p.id);
+    await Promise.all(elim.map(id => DB.update(`${base}/players/${id}`, { alive: false, outQ: game.qIndex })));
+    await DB.update(`${base}/game`, { status: "reveal", elim, voided, aliveCount: al.length - elim.length });
+    if (elim.length) beep(140, .7, "sawtooth", .2); else beep(660, .25);
+    setTimeout(() => beep(990, .3), 250);
+    const key = judged;
+    setTimeout(() => { if (game.status === "reveal" && `${game.round}-${game.qIndex}` === key) DB.update(`${base}/game`, { status: "mid" }); }, 4200);
+  }
+  function advance() {
+    if (game.status === "reveal") { DB.update(`${base}/game`, { status: "mid" }); return; }
+    if (game.qIndex >= QUESTIONS.length - 1) DB.update(`${base}/game`, { status: "end" });
+    else goQuestion(game.qIndex + 1);
+  }
+
+  /* ---- 중간 결과: 통과 / 탈락 ---- */
+  function renderMid() {
+    screen = "mid"; renderMid.idx = game.qIndex;
+    const q = QUESTIONS[game.qIndex], elim = new Set(game.elim || []);
+    const pass = alive(), out = roster().filter(p => elim.has(p.id));
+    const ans = isOX(q) ? q.options[q.answer] : q.options[q.answer];
+    const size = n => n <= 6 ? "15vh" : n <= 12 ? "11vh" : n <= 24 ? "8vh" : "6vh";
+    const who = (p, i) => `<div class="who" style="animation-delay:${Math.min(i * .08, 2)}s"><div class="e">${avatarSVG(p.av)}</div><div class="n">${esc(p.name)}</div></div>`;
+    const last = game.qIndex >= QUESTIONS.length - 1;
+    app.innerHTML = `
+      <div class="host">
+        <header><div class="pill">Q <b>${game.qIndex + 1}</b> / ${QUESTIONS.length} 결과</div>
+          <div class="qtext">정답: <span style="color:var(--gold)">${esc(ans)}</span>${game.voided ? ` <span style="color:var(--mute);font-size:.7em">— 전원 오답으로 무효</span>` : ""}</div></header>
+        <div class="mid">
+          <section class="panel pass"><h2>✅ 통과 <b>${pass.length}</b>명</h2><div class="list" style="font-size:${size(pass.length)}">${pass.map(who).join("") || `<div class="none">생존자가 없습니다</div>`}</div></section>
+          <section class="panel out"><h2>💀 탈락 <b>${out.length}</b>명</h2><div class="list" style="font-size:${size(out.length)}">${out.map(who).join("") || `<div class="none">이번 문제 탈락자 없음</div>`}</div></section>
+        </div>
+        <footer><div class="alive" style="color:var(--mute);font-size:2.4vh">누적 탈락 ${roster().length - pass.length}명</div><div style="flex:1"></div>
+          ${last ? "" : `<button class="ghost" id="fin">여기서 종료 · 최종 결과 🏆</button>`}
+          <button id="next">${last ? "최종 결과 🏆" : `다음 문제 (Q${game.qIndex + 2}) ▶`}</button></footer>
+      </div>`;
+    document.getElementById("next").onclick = advance;
+    const fin = document.getElementById("fin");
+    if (fin) fin.onclick = () => DB.update(`${base}/game`, { status: "end" });
+    beep(660, .15); setTimeout(() => beep(880, .25), 160);
+  }
+
+  /* ---- 최종 ---- */
+  function renderEnd() {
+    screen = "end";
+    const w = alive();
+    app.innerHTML = `
+      <div class="host">
+        <header><h1>🦑 JB 서바이벌 <span class="shapes">○△□</span></h1><div class="sp"></div>
+          <button class="ghost" id="reset">처음부터 다시</button></header>
+        <div class="endwrap">
+          <h2>🏆 최종 생존자 ${w.length}명</h2>
+          <div class="winners">${w.map((p, i) => `<div class="winner" style="animation-delay:${i * .15}s"><div class="c">👑</div><div class="e">${avatarSVG(p.av)}</div><div class="n">${esc(p.name)}</div></div>`).join("")}</div>
+        </div>
+      </div>`;
+    document.getElementById("reset").onclick = () => DB.update(`${base}/game`, { status: "lobby", round: game.round + 1, qIndex: -1, elim: null, voided: null });
+    beep(523, .2); setTimeout(() => beep(659, .2), 200); setTimeout(() => beep(784, .4), 400);
+  }
+
+  function route() {
+    const s = game.status;
+    if (s === "lobby") { if (screen !== "lobby") renderLobby(); else syncLobby(); }
+    else if (s === "question" || s === "reveal") {
+      if (screen !== "q" || renderQuestion.idx !== game.qIndex) renderQuestion(); else syncQuestion();
+    } else if (s === "mid") { if (screen !== "mid" || renderMid.idx !== game.qIndex) renderMid(); }
+    else if (s === "end" && screen !== "end") renderEnd();
+  }
+  document.addEventListener("keydown", e => {
+    if (e.key !== " " && e.key !== "Enter") return;
+    if (game.status === "reveal" || game.status === "mid") { e.preventDefault(); advance(); }
+    else if (game.status === "lobby" && document.activeElement?.tagName !== "BUTTON") { e.preventDefault(); goQuestion(0); }
+  });
+  DB.on(`${base}/game`, g => { if (g) { game = g; route(); } });
+  DB.on(`${base}/players`, p => {
+    players = p || {};
+    if (screen === "lobby") syncLobby(); else if (screen === "q") syncQuestion();
+  });
+}
+
+/* =====================================================================
+   참가자(휴대폰)
+   ===================================================================== */
+async function player(DB) {
+  const room = (params.get("room") || "").toUpperCase();
+  if (!room) {
+    app.innerHTML = `<div class="pl"><h1>🦑 JB 서바이벌</h1><p class="sub">방 코드를 입력하세요</p>
+      <input id="rc" maxlength="6" placeholder="예: AB12" autocapitalize="characters"><button class="big" id="go">참가자로 입장</button>
+      <p class="sub" style="margin-top:24px">진행자(큰 스크린)이신가요?</p><button class="big ghost" id="hostbtn">🖥 진행자 화면 열기</button></div>`;
+    document.getElementById("hostbtn").onclick = () => { location.search = "?host"; };
+    document.getElementById("go").onclick = () => { const v = document.getElementById("rc").value.trim(); if (v) location.search = "?room=" + encodeURIComponent(v); };
+    return;
+  }
+  const base = `sv/rooms/${room}`;
+  let pid = localStorage.getItem("sv-pid"); if (!pid) { pid = randId(10); localStorage.setItem("sv-pid", pid); }
+  const mePath = `${base}/players/${pid}`;
+
+  let game = null, me = null, screen = "loading", stageKey = null;
+  let pos = { x: .5, y: .5 }, tgt = { x: .5, y: .5 }, curQ = -1, lastSent = "", flushedQ = null, myRound = null;
+
+  function showJoin() {
+    screen = "join"; stageKey = null;
+    let av = parseAv(localStorage.getItem("sv-av") || randomAv());
+    let tab = 0;
+    const TABS = ["기본", "얼굴", "머리", "모자", "의상"];
+    app.innerHTML = `<div class="pl join">
+      <div class="jtop"><div class="pvw" id="pvw"></div>
+        <div class="jside"><input id="nm" maxlength="8" placeholder="이름 (최대 8자)" value="${esc(localStorage.getItem("sv-name") || "")}">
+          <button class="ghost" id="rnd">🎲 랜덤</button></div></div>
+      <div class="tabs" id="tabs">${TABS.map((t, i) => `<button data-t="${i}">${t}</button>`).join("")}</div>
+      <div class="opts" id="opts"></div>
+      <button class="big" id="join">참가하기</button></div>`;
+    const pvw = document.getElementById("pvw"), opts = document.getElementById("opts"), tabs = document.getElementById("tabs");
+    const withAv = (k, v) => { const a = av.slice(); a[k] = v; return a.join("."); };
+    const range = n => Array.from({ length: n }, (_, i) => i);
+    const cell = (k, v, crop) => `<button class="oc ${av[k] === v ? "sel" : ""}" data-k="${k}" data-v="${v}">${avatarSVG(withAv(k, v), crop)}</button>`;
+    const sw = (k, v, c) => `<button class="sw ${av[k] === v ? "sel" : ""}" data-k="${k}" data-v="${v}" style="background:${c}"></button>`;
+    const seg = (k, names) => `<div class="seg">${names.map((t, i) => `<button class="${av[k] === i ? "sel" : ""}" data-k="${k}" data-v="${i}">${t}</button>`).join("")}</div>`;
+    function draw() {
+      pvw.innerHTML = avatarSVG(av.join("."));
+      tabs.querySelectorAll("button").forEach(b => b.classList.toggle("sel", +b.dataset.t === tab));
+      const top = opts.scrollTop;
+      let h;
+      if (tab === 0) h = `<h4>성별</h4>${seg(0, ["남", "여"])}<h4>피부</h4><div class="grid">${SKINS.map((c, i) => sw(1, i, c)).join("")}</div>`;
+      else if (tab === 1) h = `<h4>얼굴</h4><div class="grid">${range(15).map(i => cell(2, i, "head")).join("")}</div>`;
+      else if (tab === 2) h = `<h4>머리 스타일</h4><div class="grid">${range(15).map(i => cell(3, i, "head")).join("")}</div><h4>머리색</h4><div class="grid">${HAIRC.map((c, i) => sw(4, i, c)).join("")}</div>`;
+      else if (tab === 3) h = `<h4>모자</h4><div class="grid">${range(16).map(i => cell(5, i, "head")).join("")}</div>`;
+      else h = `<h4>의상</h4>${seg(6, ["원피스", "투피스"])}<div class="grid" style="margin-top:8px">${range(15).map(i => cell(av[6] ? 8 : 7, i)).join("")}</div>`;
+      opts.innerHTML = h; opts.scrollTop = top;
+    }
+    tabs.onclick = e => { const b = e.target.closest("[data-t]"); if (b) { tab = +b.dataset.t; opts.scrollTop = 0; draw(); } };
+    opts.onclick = e => { const b = e.target.closest("[data-k]"); if (b) { av[+b.dataset.k] = +b.dataset.v; draw(); } };
+    document.getElementById("rnd").onclick = () => { av = parseAv(randomAv()); draw(); };
+    draw();
+    document.getElementById("join").onclick = async () => {
+      const name = document.getElementById("nm").value.trim().slice(0, 8);
+      if (!name) { document.getElementById("nm").focus(); return; }
+      const code = av.join(".");
+      localStorage.setItem("sv-name", name); localStorage.setItem("sv-av", code);
+      myRound = game?.round ?? 1;
+      pos = { x: .5, y: .5 }; tgt = { ...pos };
+      await DB.set(mePath, { name, av: code, round: myRound, alive: !game || game.status === "lobby", x: .5, y: .5, q: game?.qIndex ?? -1, joinedAt: DB.now(), online: true });
+      DB.onDisconnect(mePath, { online: false });
+      screen = "joined"; route();
+    };
+  }
+
+  /* 무대: 상단(문항/타이머) + 문제 + 경기장 */
+  function showStage() {
+    const s = game.status, q = s === "lobby" ? null : QUESTIONS[game.qIndex];
+    const key = `${game.round}|${s === "lobby" ? "L" : game.qIndex}`;
+    if (screen === "stage" && stageKey === key) return;
+    screen = "stage"; stageKey = key;
+    app.innerHTML = `<div class="stage">
+      <div class="top"><span class="qn">${q ? `Q${game.qIndex + 1} / ${QUESTIONS.length}` : "대기실"}</span><div class="sp"></div><span class="t" id="t"></span></div>
+      <div class="qt">${q ? esc(q.q) : `곧 시작합니다! <span style="color:var(--mute)">· ${game.playerCount || 1}명 참가 중</span>`}</div>
+      <div class="arena" id="arena">${zonesHTML(q)}${me?.alive ? `<div class="ch me" id="mech"><span class="e">${avatarSVG(me.av)}</span><span class="n">${esc(me.name)}</span></div>` : ""}<div class="bigcount" id="big"></div></div>
+      <div class="hint" id="hint"></div>
+      ${me?.alive ? `<div class="padwrap"><div class="pad" id="pad">
+        <div class="k up">▲</div><div class="k left">◀</div><div class="k right">▶</div><div class="k down">▼</div><div class="hub"></div></div></div>`
+        : `<div class="dead">💀 탈락 — 큰 화면으로 관전해 주세요</div>`}</div>`;
+    const pad = document.getElementById("pad");
+    if (pad) {
+      // 방향키 패드: 누른 위치(중심 기준 각도)로 8방향 판정 → 누른 채 손가락을 밀어도 방향 전환됨
+      let pid = null;
+      const setDir = e => {
+        const r = pad.getBoundingClientRect();
+        const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+        if (Math.hypot(dx, dy) < r.width * .1) { padDir = { x: 0, y: 0 }; return; }
+        padDir = { x: Math.abs(dx) > Math.abs(dy) * .42 ? Math.sign(dx) : 0, y: Math.abs(dy) > Math.abs(dx) * .42 ? Math.sign(dy) : 0 };
+      };
+      pad.addEventListener("pointerdown", e => { e.preventDefault(); pid = e.pointerId; pad.setPointerCapture?.(pid); setDir(e); navigator.vibrate?.(10); });
+      pad.addEventListener("pointermove", e => { if (e.pointerId === pid) setDir(e); });
+      const up = e => { if (e.pointerId === pid) { pid = null; padDir = { x: 0, y: 0 }; } };
+      pad.addEventListener("pointerup", up); pad.addEventListener("pointercancel", up); pad.addEventListener("lostpointercapture", up);
+      pad.addEventListener("touchstart", e => e.preventDefault(), { passive: false });
+      pad.addEventListener("contextmenu", e => e.preventDefault());
+    }
+    paint();
+  }
+  function canMove() {
+    if (!me || !game || !me.alive) return false;
+    if (game.status === "lobby") return true;
+    if (game.status !== "question") return false;
+    const n = DB.now(); return n >= game.qStartAt && n < game.qEndAt;
+  }
+  function paint() {
+    const el = document.getElementById("mech");
+    if (el) { el.style.left = pos.x * 100 + "%"; el.style.top = pos.y * 100 + "%"; el.classList.toggle("walk", (dir().x || dir().y) && canMove()); }
+    const pad = document.getElementById("pad");
+    if (pad) {
+      const d = dir(), cm = canMove();
+      pad.classList.toggle("off", !cm);
+      pad.querySelector(".up").classList.toggle("on", cm && d.y < 0); pad.querySelector(".down").classList.toggle("on", cm && d.y > 0);
+      pad.querySelector(".left").classList.toggle("on", cm && d.x < 0); pad.querySelector(".right").classList.toggle("on", cm && d.x > 0);
+    }
+    const t = document.getElementById("t"), h = document.getElementById("hint");
+    if (!t || !game) return;
+    let big = "";
+    if (game.status === "question") {
+      const n = DB.now();
+      if (n < game.qStartAt) { t.textContent = QUESTION_SEC; t.classList.remove("hot"); h.textContent = me?.alive ? "준비…" : "💀 탈락 — 관전 중"; }
+      else if (n < game.qEndAt) { const s = Math.ceil((game.qEndAt - n) / 1000); t.textContent = s; t.classList.toggle("hot", s <= 5); big = s <= 5 && s > 0 ? s : ""; h.textContent = me?.alive ? "방향키로 정답 구역까지 이동! 가운데 원에 남으면 탈락" : "💀 탈락 — 관전 중"; }
+      else { t.textContent = "0"; h.textContent = "판정 중… 🥁"; }
+    } else if (game.status === "lobby") { t.textContent = ""; h.textContent = "방향키로 캐릭터를 움직여 보세요"; }
+    setBig(big);
+  }
+
+  // 입력: 화면 방향키(padDir) + PC 키보드 화살표(테스트용)
+  let padDir = { x: 0, y: 0 };
+  const keys = new Set();
+  addEventListener("keydown", e => { if (e.key.startsWith("Arrow")) { keys.add(e.key); e.preventDefault(); } });
+  addEventListener("keyup", e => keys.delete(e.key));
+  addEventListener("blur", () => { keys.clear(); padDir = { x: 0, y: 0 }; });
+  const dir = () => ({
+    x: Math.sign(padDir.x + (keys.has("ArrowRight") ? 1 : 0) - (keys.has("ArrowLeft") ? 1 : 0)),
+    y: Math.sign(padDir.y + (keys.has("ArrowDown") ? 1 : 0) - (keys.has("ArrowUp") ? 1 : 0)),
+  });
+  let lastT = performance.now();
+  function loop(t) {
+    requestAnimationFrame(loop);
+    const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
+    const d = dir();
+    if (canMove() && (d.x || d.y)) {
+      const k = d.x && d.y ? Math.SQRT1_2 : 1;   // 대각선도 같은 속도
+      pos = { x: Math.min(.97, Math.max(.03, pos.x + d.x * k * SPEED_X * dt)), y: Math.min(.94, Math.max(.08, pos.y + d.y * k * SPEED_Y * dt)) };
+    }
+    if (screen === "stage") paint();
+    // 시간 종료 순간 최종 위치 즉시 전송
+    if (game?.status === "question" && me?.alive && DB.now() >= game.qEndAt && flushedQ !== game.qIndex) { flushedQ = game.qIndex; send(true); }
+  }
+  requestAnimationFrame(loop);
+  function send(force) {
+    if (!me) return;
+    const k = `${pos.x.toFixed(3)},${pos.y.toFixed(3)},${curQ}`;
+    if (!force && k === lastSent) return;
+    lastSent = k;
+    DB.update(mePath, { x: +pos.x.toFixed(4), y: +pos.y.toFixed(4), q: curQ });
+  }
+  setInterval(() => { if (canMove()) send(); }, 120);
+
+  function overlay(cls, big, title, sub) {
+    document.querySelector(".ovl")?.remove();
+    const o = document.createElement("div"); o.className = "ovl " + cls;
+    o.innerHTML = `<div class="big">${big}</div><h2>${title}</h2><p>${sub}</p>`;
+    document.body.append(o); navigator.vibrate?.(cls === "lose" ? [80, 60, 200] : 60);
+    return o;
+  }
+
+  function route() {
+    if (!game) { if (screen !== "join") { screen = "wait"; app.innerHTML = `<div class="pl"><h1>🦑</h1><p class="sub">진행자 화면이 열리기를 기다리는 중…</p></div>`; } return; }
+    if (!me) { if (screen !== "join") showJoin(); return; }
+    if (game.round !== myRound) {               // 새 게임: 부활
+      myRound = game.round; me.alive = true;
+      DB.update(mePath, { round: myRound, alive: true, outQ: null });
+    }
+    const s = game.status;
+    if (s !== "reveal" && s !== "mid" && s !== "end") document.querySelector(".ovl")?.remove();
+    if (s === "question" && curQ !== game.qIndex) {   // 새 문제: 출발점으로
+      curQ = game.qIndex; pos = { x: .5, y: .5 }; tgt = { ...pos }; flushedQ = null; send(true);
+    }
+    if (s === "lobby") { curQ = -1; showStage(); }
+    else if (s === "question") showStage();
+    else if (s === "reveal" || s === "mid") {
+      showStage();
+      const key = `${game.round}-${game.qIndex}`;
+      if (route.shown === key) return; route.shown = key;
+      const q = QUESTIONS[game.qIndex];
+      const ans = isOX(q) ? q.options[q.answer] : q.options[q.answer];
+      const out = (game.elim || []).includes(pid);
+      if (out) overlay("lose", "💀", "탈락", `정답은 <b>${esc(ans)}</b>였어요<br>남은 게임은 관전 모드로 볼 수 있어요`);
+      else if (!me.alive) overlay("", "👻", "관전 중", `정답은 <b>${esc(ans)}</b> · 생존 ${game.aliveCount}명`);
+      else if (game.voided) overlay("win", "😱", "전원 오답!", `정답은 <b>${esc(ans)}</b> — 이번 문제는 무효, 모두 생존`);
+      else overlay("win", "🎉", "생존!", `정답 <b>${esc(ans)}</b> · 생존 ${game.aliveCount}명`);
+    } else if (s === "end") {
+      if (route.shown === "end" + game.round) return; route.shown = "end" + game.round;
+      if (me.alive) overlay("win", "🏆", "최종 생존!", "끝까지 살아남았습니다 👑");
+      else overlay("", "👏", "게임 종료", "수고하셨습니다!");
+    }
+  }
+
+  const first = await DB.get(mePath);
+  if (first?.name) {
+    me = first; myRound = first.round;
+    if (typeof first.x === "number") { pos = { x: first.x, y: first.y }; tgt = { ...pos }; curQ = first.q ?? -1; }
+    DB.update(mePath, { online: true }); DB.onDisconnect(mePath, { online: false });
+  }
+  DB.on(mePath, r => {
+    const had = !!me;
+    me = r && r.name ? r : null;
+    if (had && !me) { showJoin(); return; }
+    if (me && screen === "stage" && !me.alive && document.getElementById("mech")) { stageKey = null; route(); }
+    if (!had && me && screen === "join") route();
+  });
+  DB.on(`${base}/game`, g => {
+    const prevCount = game?.playerCount; game = g;
+    if (game?.status === "lobby" && screen === "stage" && prevCount !== g.playerCount) stageKey = null;
+    if (screen !== "join") route();
+  });
+  if (!me && screen === "loading") showJoin();
+}
+
+/* ---------------- 시작 ---------------- */
+const DB = await makeDB().catch(err => { app.innerHTML = `<div class="pl"><h1>연결 실패</h1><p class="sub">${esc(err.message)}</p></div>`; throw err; });
+if (DB.mode === "local") document.body.insertAdjacentHTML("beforeend", `<div class="banner">로컬 테스트 모드 — Firebase 설정 전에는 같은 PC·같은 브라우저의 탭끼리만 연결됩니다</div>`);
+(IS_HOST ? host : player)(DB);
+</script>
+</body>
+</html>
