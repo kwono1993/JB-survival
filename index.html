@@ -220,14 +220,15 @@ const FIREBASE_CONFIG = {
    ② 문제 — options 가 2개면 2분할(O/X), 4개면 4분할. answer 는 정답의 번호(0부터)
    ===================================================================== */
 const QUESTIONS = [
-  { q: "올해 LG전자는 SG 목표 매출인 70조를 달성했다.", options: ["O", "X"], answer: 0 },
-  { q: "연초 CEO께서 적으신 개인 목표는?", options: ["하프마라톤 완주", "AI 전문가 되기", "책 30권 읽기", "10대 명산 완등하기"], answer: 1 },
-  { q: "2026년 전사 JB 슬로건은?", options: ["JB in Action", "JB Together", "Voice of JB", "JB, Go Beyond"], answer: 0 },
+  { q: "2025년·2026년 전사 JB 대표단 30명 중, 두 번째로 많은 성씨는?", options: ["권", "김", "이", "박"], answer: 2 },
+  { q: "2025년·2026년 전사 JB 대표단 30명 중, 여성 JB는 몇 명이었을까?", options: ["4명", "5명", "6명", "7명"], answer: 1 },
+  { q: "2025년·2026년 전사 JB 대표단 30명 중, 최연소자와 최연장자의 나이 차이는?", options: ["12살", "13살", "14살", "15살"], answer: 3 },
   { q: "2025년 COX 박소연 선임의 소속팀은 브랜드전략팀이다.", options: ["O", "X"], answer: 0 },
-  { q: "IFA 2026 개최 도시는?", options: ["뮌헨", "베를린", "프랑크푸르트", "슈투트가르트"], answer: 1 },
+  { q: "올해 LG전자는 SG 목표 매출인 70조를 달성했다.", options: ["O", "X"], answer: 0 },
   { q: "LG 트윈스의 올해 최종 성적은 3위이다.", options: ["O", "X"], answer: 1 },
   { q: "올해 태어난 이재훈 간사 딸의 생일은 10월 30일이다.", options: ["O", "X"], answer: 1 },
-  { q: "나는 오늘 석식에 찐친주 한잔 마시고 시작할 것이다.", options: ["O", "X"], answer: 0 },
+  { q: "2026년 전사 JB 슬로건은?", options: ["JB in Action", "JB Together", "Voice of JB", "JB, Go Beyond"], answer: 0 },
+  { q: "연초 CEO께서 적으신 개인 목표는?", options: ["하프마라톤 완주", "AI 전문가 되기", "책 30권 읽기", "10대 명산 완등하기"], answer: 1 },
 ];
 
 /* ③ 게임 설정 */
@@ -237,7 +238,7 @@ const JUDGE_DELAY = 900;     // 시간 종료 후 판정까지 여유(ms) — �
 const SPEED_X = 0.45;        // 이동 속도(경기장 폭/초). 상하 속도는 폰 화면 비율에 맞춰 자동 보정
 const BOOST_DIST = 0.42;     // 부스트 이동 거리(경기장 폭 기준)
 const BOOST_TIME = 0.18;     // 부스트 지속 시간(초)
-const BOOST_EVERY_QUESTION = false;  // false: 게임 한 판에 1번 / true: 문제마다 1번
+const BOOST_EVERY_QUESTION = true;   // true: 문제마다 1번 / false: 게임 한 판에 1번
 
 const params = new URLSearchParams(location.search);
 const IS_HOST = params.has("host");
