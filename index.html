@@ -57,7 +57,7 @@
   .bigcount span{font-weight:900;line-height:1;color:var(--red);opacity:.82;font-variant-numeric:tabular-nums;
     text-shadow:0 0 .12em #000,0 .04em 0 rgba(0,0,0,.5);animation:bigpop .9s ease-out both}
   .host .bigcount span{font-size:52vh}
-  .stage .bigcount span{font-size:130px}
+  .stage .bigcount span{font-size:200px}
   @keyframes bigpop{0%{transform:scale(1.7);opacity:0}25%{transform:scale(1);opacity:.9}100%{transform:scale(.92);opacity:.6}}
   .mid{flex:1;display:flex;gap:2vw;min-height:0}
   .mid .panel{flex:1;border-radius:2.4vh;padding:2.4vh 2vw;display:flex;flex-direction:column;gap:2vh;min-width:0;background:var(--bg2);border:3px solid var(--teal)}
@@ -161,25 +161,36 @@
   .stage .top .t{font-size:46px;line-height:1;font-weight:900;font-variant-numeric:tabular-nums;color:var(--teal);min-width:44px;text-align:right}
   .stage .top .t.hot{color:var(--red)}
   .stage .qt{font-size:19px;font-weight:800;line-height:1.35;word-break:keep-all;min-height:1.35em}
-  .stage .arena{flex:none;width:100%;aspect-ratio:2/1;border-radius:14px}
+  .stage .arena{flex:1;min-height:0;width:100%;border-radius:14px}
   .stage .arena .zone .zl{padding:.35em}
-  .stage .arena .zl b{font-size:30px}
+  .stage .arena .zl b{font-size:54px}
   .stage .arena .z4 .zl b{font-size:16px}
-  .stage .arena .zl span{font-size:15px;max-width:42vw}
+  .stage .arena .zl span{font-size:19px;max-width:42vw}
   .stage .arena .zc{display:none}
   .stage .arena .startc span{font-size:9px}
-  .stage .ch .e{font-size:34px} .stage .ch .n{font-size:10px}
-  .padwrap{flex:1;display:grid;place-items:center;min-height:0}
-  .pad{position:relative;width:min(62vw,240px);aspect-ratio:1;touch-action:none;-webkit-touch-callout:none}
-  .pad .k{position:absolute;width:36%;height:36%;border-radius:22px;background:var(--card);border:2px solid var(--line);
-    display:grid;place-items:center;font-size:30px;color:var(--mute);box-shadow:0 6px 0 #0006;transition:transform .05s,background .05s;pointer-events:none}
-  .pad .up{left:32%;top:0} .pad .down{left:32%;bottom:0} .pad .left{left:0;top:32%} .pad .right{right:0;top:32%}
-  .pad .hub{position:absolute;left:36%;top:36%;width:28%;height:28%;border-radius:50%;background:var(--bg2);pointer-events:none}
-  .pad .k.on{background:var(--pink);color:#fff;border-color:var(--pink);transform:translateY(4px);box-shadow:0 2px 0 #0006}
+  .stage .ch .e{font-size:44px}
+  .stage .ch.me{z-index:5}
+  .stage .ch.other{opacity:.8} .stage .ch.other .e{font-size:34px} .stage .ch.other .n{font-size:9px;background:rgba(0,0,0,.45)} .stage .ch .n{font-size:10px}
+  .padwrap{flex:none;display:flex;align-items:center;justify-content:space-evenly;padding:2px 0 4px}
+  .pad{position:relative;width:min(34vw,132px);aspect-ratio:1;border-radius:50%;touch-action:none;-webkit-touch-callout:none;
+    background:radial-gradient(circle,var(--bg2) 0 38%,var(--card) 100%);border:2px solid var(--line);box-shadow:inset 0 0 24px #0008}
+  .pad .knob{position:absolute;left:30%;top:30%;width:40%;height:40%;border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle at 35% 30%,#ff7fb0,var(--pink));box-shadow:0 6px 0 #0007,0 0 0 2px #fff3}
+  .boost{width:min(22vw,86px);aspect-ratio:1;border-radius:50%;padding:0;touch-action:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    background:radial-gradient(circle at 35% 30%,#ffe27a,#ff9f1a);color:#3a2300;font-size:15px;font-weight:900;box-shadow:0 7px 0 #a85e00,0 0 22px #ffb02088}
+  .boost b{font-size:24px;line-height:1}
+  .boost:active{transform:translateY(5px);box-shadow:0 2px 0 #a85e00}
+  .boost.used{background:var(--card);color:var(--mute);box-shadow:0 4px 0 #0006;filter:grayscale(1);opacity:.5}
+  .stage .zone.mine{box-shadow:inset 0 0 0 3px #fff;filter:brightness(1.35);z-index:1}
+  .ch .dot{position:absolute;left:50%;top:60%;width:9px;height:9px;margin:-4.5px;border-radius:50%;background:#fff;border:2px solid var(--pink);z-index:-1}
+  .ch.boost .e{filter:drop-shadow(0 0 .2em #ffcf3f) drop-shadow(0 0 .45em #ff9f1a)}
+  .ch.boost::after{content:"💥";position:absolute;left:50%;top:35%;font-size:1.6em;transform:translate(-50%,-50%);animation:boom .5s ease-out forwards;pointer-events:none}
+  .host .ch.boost::after{font-size:7vh}
+  @keyframes boom{from{transform:translate(-50%,-50%) scale(.4);opacity:1}to{transform:translate(-50%,-50%) scale(2.2);opacity:0}}
   .pad.off{opacity:.35}
-  .stage .dead{flex:1;display:grid;place-items:center;color:var(--mute);font-size:18px;font-weight:800}
+  .stage .dead{flex:none;height:90px;display:grid;place-items:center;color:var(--mute);font-size:18px;font-weight:800}
   .host .body .arena.fix{flex:none;height:100%;aspect-ratio:2/1;max-width:100%;margin:0 auto}
-  .stage .hint{font-size:14px;color:var(--mute);text-align:center;min-height:20px}
+  .stage .hint{font-size:13px;color:var(--mute);text-align:center;min-height:17px}
   .ovl{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:30;text-align:center;padding:24px;
     background:rgba(13,15,20,.82);animation:fade .3s}
   .ovl .big{font-size:84px;line-height:1}
@@ -221,9 +232,10 @@ const QUESTIONS = [
 const QUESTION_SEC = 15;     // 문항당 제한시간(초)
 const READY_MS = 1500;       // 문제가 뜬 뒤 이동 시작까지 대기(ms)
 const JUDGE_DELAY = 900;     // 시간 종료 후 판정까지 여유(ms) — 마지막 위치 수신 대기
-const SPEED_X = 0.38;        // 좌우 이동 속도(경기장 폭/초)
-const SPEED_Y = 0.76;        // 상하 이동 속도(경기장 높이/초) — 경기장이 2:1이라 화면상 같은 속도
-const START_R = 0.09;        // 가운데 '출발' 원 반지름 — 이 안에 있으면 미응답으로 탈락
+const SPEED_X = 0.45;        // 이동 속도(경기장 폭/초). 상하 속도는 폰 화면 비율에 맞춰 자동 보정
+const BOOST_DIST = 0.42;     // 부스트 이동 거리(경기장 폭 기준)
+const BOOST_TIME = 0.18;     // 부스트 지속 시간(초)
+const BOOST_EVERY_QUESTION = false;  // false: 게임 한 판에 1번 / true: 문제마다 1번
 
 const params = new URLSearchParams(location.search);
 const IS_HOST = params.has("host");
@@ -234,7 +246,7 @@ const CIRC = ["①","②","③","④"];
 const isOX = q => q.options.length === 2;
 
 function zoneOf(x, y, n) {
-  if (Math.hypot(x - .5, y - .5) < START_R) return -1;
+  if (x === .5 && y === .5) return -1;   // 시작점에서 한 번도 안 움직임 = 미응답(탈락)
   if (n === 2) return x < .5 ? 0 : 1;
   return (y < .5 ? 0 : 2) + (x < .5 ? 0 : 1);
 }
@@ -247,7 +259,7 @@ function zonesHTML(q) {
     <div class="zone ${n === 2 ? "z2" : "z4 z4-" + i}" data-z="${i}" style="left:${l}%;top:${t}%;width:${w}%;height:${h}%;
       background:linear-gradient(135deg, rgba(${colors[i]},.42), rgba(${colors[i]},.16))">
       <div class="zl">${n === 2 ? `<b>${esc(q.options[i])}</b>` : `<span>${esc(q.options[i])}</span>`}</div>
-      <div class="zc"></div></div>`).join("") + `<div class="startc"><span>출발</span></div>`;
+      <div class="zc"></div></div>`).join("");
 }
 
 /* =====================================================================
@@ -533,7 +545,7 @@ async function host(DB) {
           <section class="qrbox"><div id="qr"></div><div class="code">${room}</div><p>카메라로 QR을 찍어 참가하세요<br><small>${esc(joinURL)}</small></p></section>
           <div class="arena" id="arena"><div class="lobbymsg"><b id="cnt">0</b>명 입장</div></div>
         </div>
-        <footer><div class="alive" style="color:var(--mute);font-size:2.4vh">폰 화면을 터치하면 캐릭터가 그곳으로 걸어가요. 미리 움직여 보세요!</div><div class="sp" style="flex:1"></div>
+        <footer><div class="alive" style="color:var(--mute);font-size:2.4vh">조이스틱으로 캐릭터를 움직여 보세요. 🚀부스트도 대기실에서는 무제한 연습!</div><div class="sp" style="flex:1"></div>
           <button class="ghost" id="clear">참가자 비우기</button><button id="start">게임 시작 ▶</button></footer>
       </div>`;
     drawQR(document.getElementById("qr"), joinURL);
@@ -634,6 +646,7 @@ async function host(DB) {
       disp.set(el.dataset.id, { x: nx, y: ny });
       el.style.left = (nx * 100) + "%"; el.style.top = (ny * 100) + "%";
       el.classList.toggle("walk", Math.hypot(t.x - nx, t.y - ny) > .004);
+      el.classList.toggle("boost", !!p.bt && DB.now() - p.bt < 600);
     }
     if (screen === "q" && game.status === "question") {
       const now = DB.now();
@@ -757,6 +770,8 @@ async function player(DB) {
   const mePath = `${base}/players/${pid}`;
 
   let game = null, me = null, screen = "loading", stageKey = null;
+  let allPlayers = {}, otherEls = new Map();
+  const odisp = new Map();
   let pos = { x: .5, y: .5 }, tgt = { x: .5, y: .5 }, curQ = -1, lastSent = "", flushedQ = null, myRound = null;
 
   function showJoin() {
@@ -811,33 +826,54 @@ async function player(DB) {
     const s = game.status, q = s === "lobby" ? null : QUESTIONS[game.qIndex];
     const key = `${game.round}|${s === "lobby" ? "L" : game.qIndex}`;
     if (screen === "stage" && stageKey === key) return;
-    screen = "stage"; stageKey = key;
+    screen = "stage"; stageKey = key; otherEls = new Map();
     app.innerHTML = `<div class="stage">
       <div class="top"><span class="qn">${q ? `Q${game.qIndex + 1} / ${QUESTIONS.length}` : "대기실"}</span><div class="sp"></div><span class="t" id="t"></span></div>
       <div class="qt">${q ? esc(q.q) : `곧 시작합니다! <span style="color:var(--mute)">· ${game.playerCount || 1}명 참가 중</span>`}</div>
-      <div class="arena" id="arena">${zonesHTML(q)}${me?.alive ? `<div class="ch me" id="mech"><span class="e">${avatarSVG(me.av)}</span><span class="n">${esc(me.name)}</span></div>` : ""}<div class="bigcount" id="big"></div></div>
+      <div class="arena" id="arena">${zonesHTML(q)}<div id="others"></div>${me?.alive ? `<div class="ch me" id="mech"><i class="dot"></i><span class="e">${avatarSVG(me.av)}</span><span class="n">${esc(me.name)}</span></div>` : ""}<div class="bigcount" id="big"></div></div>
       <div class="hint" id="hint"></div>
-      ${me?.alive ? `<div class="padwrap"><div class="pad" id="pad">
-        <div class="k up">▲</div><div class="k left">◀</div><div class="k right">▶</div><div class="k down">▼</div><div class="hub"></div></div></div>`
+      ${me?.alive ? `<div class="padwrap"><div class="pad" id="pad"><div class="knob" id="knob"></div></div>
+        <button class="boost" id="boost"><b>🚀</b><span id="boostl">부스트</span></button></div>`
         : `<div class="dead">💀 탈락 — 큰 화면으로 관전해 주세요</div>`}</div>`;
     const pad = document.getElementById("pad");
     if (pad) {
-      // 방향키 패드: 누른 위치(중심 기준 각도)로 8방향 판정 → 누른 채 손가락을 밀어도 방향 전환됨
-      let pid = null;
+      // 조이스틱: 누른 위치까지의 방향·거리만큼 아날로그로 이동
+      let ptr = null;
+      const knob = document.getElementById("knob");
       const setDir = e => {
-        const r = pad.getBoundingClientRect();
-        const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
-        if (Math.hypot(dx, dy) < r.width * .1) { padDir = { x: 0, y: 0 }; return; }
-        padDir = { x: Math.abs(dx) > Math.abs(dy) * .42 ? Math.sign(dx) : 0, y: Math.abs(dy) > Math.abs(dx) * .42 ? Math.sign(dy) : 0 };
+        const r = pad.getBoundingClientRect(), R = r.width * .3;
+        let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+        const d = Math.hypot(dx, dy);
+        if (d > R) { dx *= R / d; dy *= R / d; }
+        knob.style.transform = `translate(${dx}px,${dy}px)`;
+        padDir = d < R * .15 ? { x: 0, y: 0 } : { x: dx / R, y: dy / R };
       };
-      pad.addEventListener("pointerdown", e => { e.preventDefault(); pid = e.pointerId; pad.setPointerCapture?.(pid); setDir(e); navigator.vibrate?.(10); });
-      pad.addEventListener("pointermove", e => { if (e.pointerId === pid) setDir(e); });
-      const up = e => { if (e.pointerId === pid) { pid = null; padDir = { x: 0, y: 0 }; } };
+      const up = e => { if (e.pointerId === ptr) { ptr = null; padDir = { x: 0, y: 0 }; knob.style.transform = ""; } };
+      pad.addEventListener("pointerdown", e => { e.preventDefault(); ptr = e.pointerId; pad.setPointerCapture?.(ptr); setDir(e); navigator.vibrate?.(10); });
+      pad.addEventListener("pointermove", e => { if (e.pointerId === ptr) setDir(e); });
       pad.addEventListener("pointerup", up); pad.addEventListener("pointercancel", up); pad.addEventListener("lostpointercapture", up);
       pad.addEventListener("touchstart", e => e.preventDefault(), { passive: false });
       pad.addEventListener("contextmenu", e => e.preventDefault());
+      const bb = document.getElementById("boost");
+      bb.addEventListener("pointerdown", e => { e.preventDefault(); doBoost(); });
+      bb.addEventListener("touchstart", e => e.preventDefault(), { passive: false });
+      bb.addEventListener("contextmenu", e => e.preventDefault());
     }
     paint();
+  }
+  // 부스트: 대기실에서는 연습 무제한, 게임 중에는 1번
+  const boostKey = () => game ? `${game.round}` + (BOOST_EVERY_QUESTION ? `-${game.qIndex}` : "") : "";
+  const boostLeft = () => game?.status === "lobby" || localStorage.getItem("sv-boost-" + room) !== boostKey();
+  function doBoost() {
+    if (!canMove() || boost || !boostLeft()) return;
+    const d = dir(), m = Math.hypot(d.x, d.y);
+    const v = m > 0 ? { x: d.x / m, y: d.y / m } : facing;
+    boost = { t: BOOST_TIME, x: v.x, y: v.y };
+    if (game.status !== "lobby") localStorage.setItem("sv-boost-" + room, boostKey());
+    DB.update(mePath, { bt: DB.now() });
+    navigator.vibrate?.([30, 20, 60]); beep(220, .25, "sawtooth", .12);
+  }
+  function canMove() {    paint();
   }
   function canMove() {
     if (!me || !game || !me.alive) return false;
@@ -848,45 +884,85 @@ async function player(DB) {
   function paint() {
     const el = document.getElementById("mech");
     if (el) { el.style.left = pos.x * 100 + "%"; el.style.top = pos.y * 100 + "%"; el.classList.toggle("walk", (dir().x || dir().y) && canMove()); }
+    if (el) el.classList.toggle("boost", !!boost);
     const pad = document.getElementById("pad");
     if (pad) {
-      const d = dir(), cm = canMove();
-      pad.classList.toggle("off", !cm);
-      pad.querySelector(".up").classList.toggle("on", cm && d.y < 0); pad.querySelector(".down").classList.toggle("on", cm && d.y > 0);
-      pad.querySelector(".left").classList.toggle("on", cm && d.x < 0); pad.querySelector(".right").classList.toggle("on", cm && d.x > 0);
+      pad.classList.toggle("off", !canMove());
+      const left = boostLeft(), bb = document.getElementById("boost");
+      bb.classList.toggle("used", !left);
+      document.getElementById("boostl").textContent = game?.status === "lobby" ? "연습" : left ? "1회" : "사용함";
     }
+    // 내가 지금 판정될 구역에 불 켜기
+    const q = game && game.status === "question" ? QUESTIONS[game.qIndex] : null;
+    const mz = q && me?.alive ? zoneOf(pos.x, pos.y, q.options.length) : -1;
+    document.querySelectorAll("#arena .zone").forEach(z => z.classList.toggle("mine", +z.dataset.z === mz));
     const t = document.getElementById("t"), h = document.getElementById("hint");
     if (!t || !game) return;
     let big = "";
     if (game.status === "question") {
       const n = DB.now();
       if (n < game.qStartAt) { t.textContent = QUESTION_SEC; t.classList.remove("hot"); h.textContent = me?.alive ? "준비…" : "💀 탈락 — 관전 중"; }
-      else if (n < game.qEndAt) { const s = Math.ceil((game.qEndAt - n) / 1000); t.textContent = s; t.classList.toggle("hot", s <= 5); big = s <= 5 && s > 0 ? s : ""; h.textContent = me?.alive ? "방향키로 정답 구역까지 이동! 가운데 원에 남으면 탈락" : "💀 탈락 — 관전 중"; }
+      else if (n < game.qEndAt) { const s = Math.ceil((game.qEndAt - n) / 1000); t.textContent = s; t.classList.toggle("hot", s <= 5); big = s <= 5 && s > 0 ? s : ""; h.textContent = me?.alive ? mz < 0 ? "조이스틱으로 이동! 안 움직이면 탈락" : `지금 내 선택: ${q.options[mz]}` : "💀 탈락 — 관전 중"; }
       else { t.textContent = "0"; h.textContent = "판정 중… 🥁"; }
-    } else if (game.status === "lobby") { t.textContent = ""; h.textContent = "방향키로 캐릭터를 움직여 보세요"; }
+    } else if (game.status === "lobby") { t.textContent = ""; h.textContent = "조이스틱과 🚀부스트를 연습해 보세요"; }
     setBig(big);
   }
 
-  // 입력: 화면 방향키(padDir) + PC 키보드 화살표(테스트용)
-  let padDir = { x: 0, y: 0 };
+  // 입력: 조이스틱(padDir, 아날로그) + PC 키보드 화살표(테스트용, 스페이스=부스트)
+  let padDir = { x: 0, y: 0 }, facing = { x: 1, y: 0 }, boost = null;
   const keys = new Set();
-  addEventListener("keydown", e => { if (e.key.startsWith("Arrow")) { keys.add(e.key); e.preventDefault(); } });
+  addEventListener("keydown", e => { if (e.key.startsWith("Arrow")) { keys.add(e.key); e.preventDefault(); } else if (e.key === " " && screen === "stage") { e.preventDefault(); doBoost(); } });
   addEventListener("keyup", e => keys.delete(e.key));
   addEventListener("blur", () => { keys.clear(); padDir = { x: 0, y: 0 }; });
-  const dir = () => ({
-    x: Math.sign(padDir.x + (keys.has("ArrowRight") ? 1 : 0) - (keys.has("ArrowLeft") ? 1 : 0)),
-    y: Math.sign(padDir.y + (keys.has("ArrowDown") ? 1 : 0) - (keys.has("ArrowUp") ? 1 : 0)),
-  });
+  const dir = () => {
+    if (padDir.x || padDir.y) return padDir;
+    const x = (keys.has("ArrowRight") ? 1 : 0) - (keys.has("ArrowLeft") ? 1 : 0), y = (keys.has("ArrowDown") ? 1 : 0) - (keys.has("ArrowUp") ? 1 : 0);
+    const k = x && y ? Math.SQRT1_2 : 1;      // 대각선도 같은 속도
+    return { x: x * k, y: y * k };
+  };
+  // 다른 참가자들도 내 폰 경기장에 함께 표시(진행자 화면과 같은 위치)
+  function drawOthers() {
+    const box = document.getElementById("others"); if (!box || !game) return;
+    const elim = new Set(game.status === "reveal" ? game.elim || [] : []);
+    const seen = new Set();
+    for (const [id, p] of Object.entries(allPlayers)) {
+      if (id === pid || !p || !p.name || p.round !== game.round) continue;
+      if (!(p.alive || elim.has(id))) continue;
+      seen.add(id);
+      let el = otherEls.get(id);
+      if (!el || !el.isConnected) {
+        el = document.createElement("div"); el.className = "ch other";
+        el.innerHTML = `<span class="e">${avatarSVG(p.av)}</span><span class="n">${esc(p.name)}</span>`;
+        box.append(el); otherEls.set(id, el);
+      }
+      const t = (game.status === "lobby" || p.q === game.qIndex) && typeof p.x === "number" ? { x: p.x, y: p.y } : { x: .5, y: .5 };
+      const c = odisp.get(id) || t;
+      const n = { x: c.x + (t.x - c.x) * .25, y: c.y + (t.y - c.y) * .25 };
+      odisp.set(id, n);
+      el.style.left = n.x * 100 + "%"; el.style.top = n.y * 100 + "%";
+      el.classList.toggle("walk", Math.hypot(t.x - n.x, t.y - n.y) > .004);
+      el.classList.toggle("dead", elim.has(id));
+      el.classList.toggle("boost", !!p.bt && DB.now() - p.bt < 600);
+    }
+    for (const [id, el] of otherEls) if (!seen.has(id)) { el.remove(); otherEls.delete(id); }
+  }
   let lastT = performance.now();
   function loop(t) {
     requestAnimationFrame(loop);
     const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
     const d = dir();
-    if (canMove() && (d.x || d.y)) {
-      const k = d.x && d.y ? Math.SQRT1_2 : 1;   // 대각선도 같은 속도
-      pos = { x: Math.min(.97, Math.max(.03, pos.x + d.x * k * SPEED_X * dt)), y: Math.min(.94, Math.max(.08, pos.y + d.y * k * SPEED_Y * dt)) };
+    const ar = document.getElementById("arena"), asp = ar && ar.clientHeight ? ar.clientWidth / ar.clientHeight : 2;  // 폰 경기장 비율에 맞춰 상하 속도 보정
+    const clamp = p => ({ x: Math.min(.97, Math.max(.03, p.x)), y: Math.min(.94, Math.max(.08, p.y)) });
+    if (!canMove()) boost = null;
+    else if (boost) {
+      const step = Math.min(dt, boost.t), v = BOOST_DIST / BOOST_TIME;
+      pos = clamp({ x: pos.x + boost.x * v * step, y: pos.y + boost.y * v * asp * step });
+      boost.t -= step; if (boost.t <= 0) { boost = null; send(true); }
+    } else if (d.x || d.y) {
+      const m = Math.hypot(d.x, d.y); facing = { x: d.x / m, y: d.y / m };
+      pos = clamp({ x: pos.x + d.x * SPEED_X * dt, y: pos.y + d.y * SPEED_X * asp * dt });
     }
-    if (screen === "stage") paint();
+    if (screen === "stage") { paint(); drawOthers(); }
     // 시간 종료 순간 최종 위치 즉시 전송
     if (game?.status === "question" && me?.alive && DB.now() >= game.qEndAt && flushedQ !== game.qIndex) { flushedQ = game.qIndex; send(true); }
   }
@@ -946,6 +1022,7 @@ async function player(DB) {
     if (typeof first.x === "number") { pos = { x: first.x, y: first.y }; tgt = { ...pos }; curQ = first.q ?? -1; }
     DB.update(mePath, { online: true }); DB.onDisconnect(mePath, { online: false });
   }
+  DB.on(`${base}/players`, p => { allPlayers = p || {}; });
   DB.on(mePath, r => {
     const had = !!me;
     me = r && r.name ? r : null;
